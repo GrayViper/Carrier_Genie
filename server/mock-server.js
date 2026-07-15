@@ -87,7 +87,9 @@ function getEnvSettings() {
   // In dev mode, allow role-based login for testing different roles (admin, recruiter, student)
   // In production, always require explicit credentials
   const allowDevAuth = isProduction ? (process.env.ALLOW_DEV_AUTH === '1') : (process.env.ALLOW_DEV_AUTH !== '0');
-  const frontendOrigin = process.env.FRONTEND_ORIGIN || (isProduction ? null : '*');
+  const frontendOrigin = process.env.FRONTEND_ORIGIN
+    ? process.env.FRONTEND_ORIGIN.replace(/\/$/, '')
+    : (isProduction ? null : '*');
 
   if (isProduction && !jwtSecret) {
     throw new Error('JWT_SECRET is required in production. Set JWT_SECRET before starting the server.');
@@ -810,15 +812,18 @@ function setupRoutes(app) {
 
   app.get('/ready', async (req, res) => {
     try {
-      // Check data accessibility and basic queue health
-      await ensureData();
       if (process.env.MONGODB_URI) {
-        const db = getDb();
-        await db.command({ ping: 1 });
+        try {
+          const db = getDb();
+          await db.command({ ping: 1 });
+        } catch {
+          return res.status(503).json({ ready: false, error: 'MongoDB not connected' });
+        }
+      } else {
+        await ensureData();
       }
       const backlog = inprocQueue.length;
       const processing = inprocProcessing;
-      // If the queue is extremely large treat as not ready (simple heuristic)
       const ready = backlog < 100;
       return res.json({ ready, backlog, processing, timestamp: new Date().toISOString() });
     } catch {
@@ -889,20 +894,40 @@ function setupRoutes(app) {
 }
 
 if (process.env.NODE_ENV !== 'test') {
-  const server = app.listen(PORT, () => {
-    // eslint-disable-next-line no-console
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  const startServer = async () => {
+    // Connect to MongoDB at startup if URI is provided
+    if (process.env.MONGODB_URI) {
+      try {
+        await connectMongo(process.env.MONGODB_URI);
+        // eslint-disable-next-line no-console
+        console.log('MongoDB connected successfully');
+        await ensureData();
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('MongoDB connection failed:', err.message);
+        process.exit(1);
+      }
+    } else {
+      await ensureData();
+    }
 
-  const shutdown = async () => {
-    await closeMongo();
-    server.close(() => {
+    const server = app.listen(PORT, () => {
       // eslint-disable-next-line no-console
-      console.log('Server shutdown complete');
-      process.exit(0);
+      console.log(`Server running on http://localhost:${PORT}`);
     });
+
+    const shutdown = async () => {
+      await closeMongo();
+      server.close(() => {
+        // eslint-disable-next-line no-console
+        console.log('Server shutdown complete');
+        process.exit(0);
+      });
+    };
+
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
   };
 
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
+  startServer();
 }
