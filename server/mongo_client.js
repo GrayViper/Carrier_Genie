@@ -5,7 +5,12 @@ let db = null;
 
 export async function connectMongo(uri) {
   if (client) return db;
-  client = new MongoClient(uri);
+  client = new MongoClient(uri, {
+    tls: true,
+    tlsAllowInvalidCertificates: false,
+    serverSelectionTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+  });
   await client.connect();
   db = client.db();
   return db;
