@@ -5,9 +5,11 @@ import { JobsProvider } from './context/JobsContext';
 import { ApplicationsProvider } from './context/ApplicationsContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ServerStatusBanner from './components/ServerStatusBanner';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import { useServerStatus } from './hooks/useServerStatus';
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -38,6 +40,8 @@ function ProtectedRoute({ children }) {
 }
 
 export default function App() {
+  const { status, retry } = useServerStatus();
+
   return (
     <AuthProvider>
       <JobsProvider>
@@ -46,7 +50,8 @@ export default function App() {
             <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-[#080710] text-[#f3f4f6]">
               <div className="absolute inset-0 grid-overlay opacity-70 pointer-events-none z-0"></div>
               <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_left,rgba(129,140,248,0.14),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(34,211,238,0.12),transparent_28%)]"></div>
-              
+
+              <ServerStatusBanner status={status} retry={retry} />
               <Navbar />
               {/* Demo trigger listener: listens for global demo events and signs in as demo */}
               <DemoTrigger />

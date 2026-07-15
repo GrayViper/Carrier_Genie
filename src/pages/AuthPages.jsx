@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Sparkles, User, Briefcase, Shield, Mail, Lock, Eye, EyeOff, Loader2, Trash2 } from 'lucide-react';
+import { Sparkles, User, Briefcase, Shield, Mail, Lock, Eye, EyeOff, Loader2, Trash2, WifiOff } from 'lucide-react';
+import { useServerStatus, SERVER_STATUS } from '../hooks/useServerStatus';
 
 export default function AuthPages() {
   const { login, signup, loading } = useAuth();
+  const { status } = useServerStatus();
   const navigate = useNavigate();
   const location = useLocation();
   const isLogin = location.pathname === '/login';
+  const serverDown = status === SERVER_STATUS.DOWN;
+  const serverWaking = status === SERVER_STATUS.WAKING;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -99,7 +103,14 @@ export default function AuthPages() {
         else if (u.role === 'recruiter') navigate('/dashboard/recruiter');
         else if (u.role === 'admin') navigate('/admin');
       } catch (err) {
-        setError('Invalid credentials. Please try again.');
+        const msg = err?.message || '';
+        if (msg.includes('fetch') || msg.includes('network') || msg.includes('Failed')) {
+          setError('Cannot reach the server. It may be waking up — please wait 30–60 seconds and try again.');
+        } else if (msg.includes('invalid') || msg.includes('credentials') || msg.includes('401')) {
+          setError('Invalid email or password. Please try again.');
+        } else {
+          setError(msg || 'Login failed. Please try again.');
+        }
       }
     } else {
       if (!name.trim()) {
@@ -115,7 +126,14 @@ export default function AuthPages() {
         else if (u.role === 'recruiter') navigate('/dashboard/recruiter');
         else if (u.role === 'admin') navigate('/admin');
       } catch (err) {
-        setError('Registration failed. Please check details.');
+        const msg = err?.message || '';
+        if (msg.includes('fetch') || msg.includes('network') || msg.includes('Failed')) {
+          setError('Cannot reach the server. It may be waking up — please wait 30–60 seconds and try again.');
+        } else if (msg.includes('exists') || msg.includes('409')) {
+          setError('An account with this email already exists. Try logging in instead.');
+        } else {
+          setError(msg || 'Registration failed. Please check your details.');
+        }
       }
     }
   };
@@ -155,6 +173,22 @@ export default function AuthPages() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5 text-left">
+            {/* Server status warning */}
+            {(serverDown || serverWaking) && (
+              <div className={`flex items-start gap-2 rounded-lg border p-3 text-xs font-medium ${
+                serverDown
+                  ? 'border-rose-500/30 bg-rose-500/10 text-rose-300'
+                  : 'border-amber-500/30 bg-amber-500/10 text-amber-300'
+              }`}>
+                <WifiOff className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                <span>
+                  {serverDown
+                    ? 'Server is currently offline. Login and signup are unavailable until it comes back online.'
+                    : 'Server is waking up (free tier). This may take up to 60 seconds — your request will go through shortly.'}
+                </span>
+              </div>
+            )}
+
             {error && (
               <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs p-3 rounded-lg font-medium text-center">
                 {error}
@@ -281,13 +315,22 @@ export default function AuthPages() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
-              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 sm:text-sm"
+              disabled={loading || serverDown}
+              className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg transition-all duration-200 sm:text-sm ${
+                serverDown
+                  ? 'bg-slate-700 cursor-not-allowed opacity-50 shadow-none'
+                  : 'bg-indigo-600 hover:bg-indigo-500 hover:-translate-y-0.5 shadow-indigo-600/20'
+              }`}
             >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Processing...</span>
+                </>
+              ) : serverWaking ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Server waking up...</span>
                 </>
               ) : (
                 <span>{isLogin ? 'Login' : 'Create Account'}</span>
