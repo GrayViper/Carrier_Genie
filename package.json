@@ -1,0 +1,65 @@
+{
+  "name": "career_genie",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20.9.0",
+    "npm": ">=9"
+  },
+  "scripts": {
+    "dev": "vite",
+    "start:mock": "node server/mock-server.js",
+    "backup": "node server/backup.js --create",
+    "backup:list": "node server/backup.js --list",
+    "backup:restore": "node server/backup.js --restore",
+    "todo:complete": "node tools/update_todo.js --complete",
+    "mongo:migrate": "node server/mongo_adapter.js --migrate",
+    "mongo:create-indexes": "node server/mongo_adapter.js --create-indexes",
+    "build": "vite build",
+    "start": "node server/mock-server.js",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "benchmark": "node tools/benchmark_resume.js",
+    "test": "vitest",
+    "test:ci": "vitest --run --reporter verbose",
+    "test:security": "vitest --run server/mock-server.test.js",
+    "mcp:clerk": "node server/mcp/clerk-mcp-server.js",
+    "mcp:background": "node server/mcp/background-mcp-server.js"
+  },
+  "dependencies": {
+    "@clerk/backend": "^3.11.4",
+    "@clerk/react": "^6.12.2",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@tailwindcss/vite": "^4.3.2",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "lucide-react": "^1.24.0",
+    "mongodb": "^5.9.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.1",
+    "tailwindcss": "^4.3.2"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.6.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "@vitest/coverage-v8": "^4.1.10",
+    "jsdom": "^22.1.0",
+    "oxlint": "^1.71.0",
+    "supertest": "^7.2.2",
+    "vite": "^8.1.1",
+    "vitest": "^1.5.4"
+  },
+  "vitest": {
+    "environment": "jsdom",
+    "setupFiles": "./src/setupTests.js",
+    "globals": true
+  }
+}

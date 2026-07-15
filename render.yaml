@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: career-genie-backend
+    env: node
+    plan: starter
+    region: oregon
+    branch: main
+    buildCommand: npm ci
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generator: random
+      - key: FRONTEND_ORIGIN
+        value: https://<your-vercel-domain>.vercel.app
+      - key: MONGODB_URI
+        fromDatabase: mongodb
+      - key: OPENAI_API_KEY
+        fromSecret: OPENAI_API_KEY
+      - key: OPENAI_ENDPOINT
+        value: https://api.openai.com/v1/chat/completions
+      - key: OPENAI_MODEL
+        value: gpt-3.5-turbo
+    healthCheckPath: /ready
+    port: $PORT
+    instanceCount: 1
+    autoDeploy: true

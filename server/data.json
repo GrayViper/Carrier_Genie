@@ -1,0 +1,344 @@
+{
+  "users": [
+    {
+      "id": "usr_lau48n0",
+      "name": "Read Notify User",
+      "email": "readnotify-1784122562659@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$bFT7T5BhK77B22sKfRER1OzywFVb7E4aDpmnbtLy91GABqOM/CpSe"
+    },
+    {
+      "id": "usr_qxr1fau",
+      "name": "Notify User",
+      "email": "notifyuser-1784122562240@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$TFj9HH.TP1E0snGaEfVZ/OJKVarWR8G.rOIWpV4.hGlCclCbBpHdO"
+    },
+    {
+      "id": "usr_1dyqrja",
+      "name": "Background User",
+      "email": "bguser-1784122561931@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$eb4t5AxcLxPxJYxRkbQbPOlAxsJLEOzi1DHR1ViiMV8gJyPiKj6Li"
+    },
+    {
+      "id": "usr_b8q78n6",
+      "name": "AI User",
+      "email": "aiuser-1784122560931@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$FgicOcQZQQWyiFbI20yYluNHLsNcqoj8MVgIUxi2r4wXDRfiAxsRy"
+    },
+    {
+      "id": "usr_fkx8bor",
+      "name": "Fail User",
+      "email": "failuser-1784122560283@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$8WZ/u0xPn5ehsdhnSQyvEObzLOi7V0zIsH3yQZw3XspgBrCFVDKHK"
+    },
+    {
+      "id": "usr_e1gg8a1",
+      "name": "Login User",
+      "email": "loginuser-1784122559690@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$zb76pkZqDElgfMTSNaNPfe0NeTcu/uWy2kL4UiyH7Zr5un2sZaHWa"
+    },
+    {
+      "id": "usr_zsadnme",
+      "name": "New User",
+      "email": "newuser-1784122559382@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$/m.dcCD.gDOKfFyn30rqludXfUGlAcvFvEyqJZV.iZnfszh4LCOfO"
+    },
+    {
+      "id": "usr_dlv2zgb",
+      "name": "Read Notify User",
+      "email": "readnotify-1784121955776@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$Pi/dytxP8v/YuoPkgtMvbeZZ8nOQF/6f5Js4UfPkHsibTi/I1Q2PG"
+    },
+    {
+      "id": "usr_student",
+      "name": "Olivia Chen",
+      "email": "olivia@gmail.com",
+      "role": "student",
+      "skills": [
+        "React",
+        "JavaScript"
+      ],
+      "resumeUploaded": true,
+      "resumeName": "Olivia_Chen_Resume_2026.pdf",
+      "resumeScore": 84,
+      "feedback": {},
+      "atsScore": 84
+    },
+    {
+      "id": "usr_recruiter",
+      "name": "David Miller",
+      "email": "david@stripe.com",
+      "role": "recruiter"
+    },
+    {
+      "id": "usr_admin",
+      "name": "Alex Mercer",
+      "email": "admin@careergenie.com",
+      "role": "admin"
+    }
+  ],
+  "jobs": [
+    {
+      "id": "job_fbq851w",
+      "title": "Read Receipt Job",
+      "company": "NotifyCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "Needs approval",
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "N",
+      "logoBg": "bg-slate-600",
+      "status": "active"
+    },
+    {
+      "id": "job_6s3oj20",
+      "title": "Approved Job",
+      "company": "NotifyCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "Needs approval",
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "N",
+      "logoBg": "bg-slate-600",
+      "status": "active"
+    },
+    {
+      "id": "job_fq2s632",
+      "title": "Rotated Job",
+      "company": "RotateCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "",
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "R",
+      "logoBg": "bg-slate-600",
+      "status": "pending_approval"
+    },
+    {
+      "id": "job_7hhplzg",
+      "title": "Secure Job",
+      "company": "SecureCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "",
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "S",
+      "logoBg": "bg-slate-600",
+      "status": "pending_approval"
+    },
+    {
+      "id": "job_6js1ahn",
+      "title": "Read Receipt Job",
+      "company": "NotifyCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "Needs approval",
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "N",
+      "logoBg": "bg-slate-600",
+      "status": "active"
+    },
+    {
+      "id": "job_1",
+      "title": "Frontend Engineer",
+      "company": "Acme",
+      "location": "Remote",
+      "tags": [
+        "React",
+        "JavaScript"
+      ],
+      "description": "Build great UIs.",
+      "status": "active"
+    }
+  ],
+  "applications": [
+    {
+      "id": "app_r7j3whs",
+      "studentId": "usr_lau48n0",
+      "studentName": "Read Notify User",
+      "studentEmail": "readnotify-1784122562659@careergenie.test",
+      "studentSkills": [],
+      "jobId": "job_fbq851w",
+      "jobTitle": "Read Receipt Job",
+      "company": "NotifyCo",
+      "logo": "N",
+      "logoBg": "bg-slate-600",
+      "date": "Jul 15, 2026",
+      "status": "Applied",
+      "matchScore": 0,
+      "history": [
+        {
+          "status": "Applied",
+          "date": "Jul 15, 2026",
+          "comment": "Application submitted."
+        }
+      ]
+    },
+    {
+      "id": "app_pgxrwox",
+      "studentId": "usr_qxr1fau",
+      "studentName": "Notify User",
+      "studentEmail": "notifyuser-1784122562240@careergenie.test",
+      "studentSkills": [],
+      "jobId": "job_6s3oj20",
+      "jobTitle": "Approved Job",
+      "company": "NotifyCo",
+      "logo": "N",
+      "logoBg": "bg-slate-600",
+      "date": "Jul 15, 2026",
+      "status": "Applied",
+      "matchScore": 0,
+      "history": [
+        {
+          "status": "Applied",
+          "date": "Jul 15, 2026",
+          "comment": "Application submitted."
+        }
+      ]
+    },
+    {
+      "id": "app_8161mcs",
+      "studentId": "usr_dlv2zgb",
+      "studentName": "Read Notify User",
+      "studentEmail": "readnotify-1784121955776@careergenie.test",
+      "studentSkills": [],
+      "jobId": "job_6js1ahn",
+      "jobTitle": "Read Receipt Job",
+      "company": "NotifyCo",
+      "logo": "N",
+      "logoBg": "bg-slate-600",
+      "date": "Jul 15, 2026",
+      "status": "Applied",
+      "matchScore": 0,
+      "history": [
+        {
+          "status": "Applied",
+          "date": "Jul 15, 2026",
+          "comment": "Application submitted."
+        }
+      ]
+    }
+  ],
+  "resumeResults": {
+    "scan_12vsuwv": {
+      "status": "error",
+      "error": "processing error",
+      "detail": "uploadedAt is not defined",
+      "finishedAt": "2026-07-15T13:25:55.749Z"
+    },
+    "scan_kkaw7ph": {
+      "status": "error",
+      "error": "processing error",
+      "detail": "uploadedAt is not defined",
+      "finishedAt": "2026-07-15T13:36:02.585Z"
+    },
+    "scan_1yxyjdw": {
+      "status": "pending",
+      "studentId": "usr_1dyqrja",
+      "fileName": "resume_background.pdf",
+      "startedAt": "2026-07-15T13:36:02.217Z",
+      "studentEmail": "bguser-1784122561931@careergenie.test",
+      "studentRole": "student",
+      "uploaderId": "usr_1dyqrja",
+      "uploaderRole": "student",
+      "contentBase64": "QmFja2dyb3VuZCBqb2IgY29udGVudA=="
+    }
+  },
+  "notifications": [
+    {
+      "id": "notif_spw48ok",
+      "type": "job_approved",
+      "recipientId": "usr_dlv2zgb",
+      "recipientEmail": "readnotify-1784121955776@careergenie.test",
+      "jobId": "job_6js1ahn",
+      "jobTitle": "Read Receipt Job",
+      "company": "NotifyCo",
+      "message": "Your application for Read Receipt Job at NotifyCo has been approved.",
+      "subject": "Your application for Read Receipt Job has been approved",
+      "delivery": {
+        "channel": "email",
+        "status": "queued",
+        "provider": "mock",
+        "sentAt": "2026-07-15T13:25:56.099Z",
+        "to": "readnotify-1784121955776@careergenie.test",
+        "messageId": null
+      },
+      "createdAt": "2026-07-15T13:25:56.099Z",
+      "read": true
+    },
+    {
+      "id": "notif_j4prix3",
+      "type": "job_approved",
+      "recipientId": "usr_qxr1fau",
+      "recipientEmail": "notifyuser-1784122562240@careergenie.test",
+      "jobId": "job_6s3oj20",
+      "jobTitle": "Approved Job",
+      "company": "NotifyCo",
+      "message": "Your application for Approved Job at NotifyCo has been approved.",
+      "subject": "Your application for Approved Job has been approved",
+      "delivery": {
+        "channel": "email",
+        "status": "queued",
+        "provider": "mock",
+        "sentAt": "2026-07-15T13:36:02.651Z",
+        "to": "notifyuser-1784122562240@careergenie.test",
+        "messageId": null
+      },
+      "createdAt": "2026-07-15T13:36:02.651Z",
+      "read": false
+    },
+    {
+      "id": "notif_30ootai",
+      "type": "job_approved",
+      "recipientId": "usr_lau48n0",
+      "recipientEmail": "readnotify-1784122562659@careergenie.test",
+      "jobId": "job_fbq851w",
+      "jobTitle": "Read Receipt Job",
+      "company": "NotifyCo",
+      "message": "Your application for Read Receipt Job at NotifyCo has been approved.",
+      "subject": "Your application for Read Receipt Job has been approved",
+      "delivery": {
+        "channel": "email",
+        "status": "queued",
+        "provider": "mock",
+        "sentAt": "2026-07-15T13:36:02.959Z",
+        "to": "readnotify-1784122562659@careergenie.test",
+        "messageId": null
+      },
+      "createdAt": "2026-07-15T13:36:02.959Z",
+      "read": true
+    }
+  ],
+  "loginEmails": [
+    "olivia@gmail.com",
+    "david@stripe.com",
+    "loginuser-1784122559690@careergenie.test"
+  ]
+}
