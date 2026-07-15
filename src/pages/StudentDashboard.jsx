@@ -18,11 +18,10 @@ import {
 } from 'lucide-react';
 import { getNextSteps, getSavedJobs } from '../utils/studentJourney';
 import { hasStoredResume } from '../utils/resumeStorage';
-import Skeleton, { StatCardSkeleton, AppItemSkeleton } from '../components/Skeleton';
 
 export default function StudentDashboard() {
 	const { user, updateUserProfile } = useAuth();
-	const { jobs, jobsLoading, calculateMatchScore } = useJobs();
+	const { jobs, calculateMatchScore } = useJobs();
 	const { applications, appsLoading } = useApplications();
 	const navigate = useNavigate();
 
@@ -68,7 +67,7 @@ export default function StudentDashboard() {
 		: Math.min(100, (hasResume ? 38 : 0) + (user.skills?.length ? 24 : 0) + (studentApps.length ? 18 : 0) + 20);
 	const resumeScore = hasResume ? (user.resumeScore || 78) : null;
 	const savedJobsCount = getSavedJobs().length;
-	const nextSteps = getNextSteps({ resumeUploaded: hasResume, skills: user.skills || [], applications: studentApps, savedJobsCount, notificationCount: 0 });
+	const nextSteps = getNextSteps({ resumeUploaded: hasResume, skills: user.skills || [], applications: appsLoading ? [] : studentApps, savedJobsCount, notificationCount: 0 });
 	const nextStepActions = {
 		resume: () => navigate('/resume'),
 		skills: () => setIsEditingProfile(true),
@@ -167,30 +166,21 @@ export default function StudentDashboard() {
 					</div>
 
 					<div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-4">
-						{jobsLoading || appsLoading ? (
-							<>
-								<StatCardSkeleton />
-								<StatCardSkeleton />
-								<StatCardSkeleton />
-								<StatCardSkeleton />
-							</>
-						) : (
-							[
-								{ label: 'Profile strength', value: `${profileStrength}%`, desc: 'Resume + skills + activity', icon: <Target className="h-4 w-4 text-indigo-400" /> },
-								{ label: 'Top match', value: `${matchedJobs[0]?.matchScore || 0}%`, desc: 'Best fit opportunity', icon: <TrendingUp className="h-4 w-4 text-cyan-400" /> },
-								{ label: 'Applications', value: studentApps.length, desc: 'In progress or pending', icon: <Briefcase className="h-4 w-4 text-purple-400" /> },
-								...(hasResume ? [{ label: 'Resume score', value: `${resumeScore}%`, desc: 'Current readiness snapshot', icon: <FileText className="h-4 w-4 text-emerald-400" /> }] : [])
-							].map((stat, index) => (
-								<div key={index} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-									<div className="flex items-center justify-between">
-										<span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gray-500">{stat.label}</span>
-										{stat.icon}
-									</div>
-									<div className="mt-3 text-2xl font-black text-white">{stat.value}</div>
-									<div className="mt-1 text-xs text-gray-400">{stat.desc}</div>
+						{[
+							{ label: 'Profile strength', value: `${profileStrength}%`, desc: 'Resume + skills + activity', icon: <Target className="h-4 w-4 text-indigo-400" /> },
+							{ label: 'Top match', value: `${matchedJobs[0]?.matchScore || 0}%`, desc: 'Best fit opportunity', icon: <TrendingUp className="h-4 w-4 text-cyan-400" /> },
+							{ label: 'Applications', value: studentApps.length, desc: 'In progress or pending', icon: <Briefcase className="h-4 w-4 text-purple-400" /> },
+							...(hasResume ? [{ label: 'Resume score', value: `${resumeScore}%`, desc: 'Current readiness snapshot', icon: <FileText className="h-4 w-4 text-emerald-400" /> }] : [])
+						].map((stat, index) => (
+							<div key={index} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+								<div className="flex items-center justify-between">
+									<span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gray-500">{stat.label}</span>
+									{stat.icon}
 								</div>
-							))
-						)}
+								<div className="mt-3 text-2xl font-black text-white">{stat.value}</div>
+								<div className="mt-1 text-xs text-gray-400">{stat.desc}</div>
+							</div>
+						))}
 					</div>
 				</div>
 			</div>
@@ -341,53 +331,28 @@ export default function StudentDashboard() {
 						</div>
 
 						<div className="mt-5 grid gap-3 md:grid-cols-3">
-							{jobsLoading ? (
-								<>
-									<div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
-										<Skeleton variant="round" className="h-8 w-8" />
-										<Skeleton className="h-4 w-3/4 mt-3" />
-										<Skeleton className="h-3 w-1/2" />
-										<Skeleton variant="round" className="h-5 w-20 mt-4" />
+							{matchedJobs.map((job) => (
+								<div key={job.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+									<div className="flex items-start justify-between">
+										<span className={`flex h-8 w-8 items-center justify-center rounded-xl text-[10px] font-black text-white ${job.logoBg}`}>{job.logo}</span>
+										{hasResume ? (
+											<span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${job.matchScore >= 80 ? 'bg-indigo-500/10 text-indigo-300' : job.matchScore >= 60 ? 'bg-purple-500/10 text-purple-300' : 'bg-cyan-500/10 text-cyan-300'}`}>{job.matchScore}%</span>
+										) : (
+											<span className="rounded-full bg-cyan-500/10 px-2 py-1 text-[10px] font-semibold text-cyan-300">Internship</span>
+										)}
 									</div>
-									<div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
-										<Skeleton variant="round" className="h-8 w-8" />
-										<Skeleton className="h-4 w-3/4 mt-3" />
-										<Skeleton className="h-3 w-1/2" />
-										<Skeleton variant="round" className="h-5 w-20 mt-4" />
+
+									<div className="mt-3">
+										<div className="text-sm font-semibold text-white">{job.title}</div>
+										<div className="mt-1 text-xs text-gray-400">{job.company}</div>
 									</div>
-									<div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
-										<Skeleton variant="round" className="h-8 w-8" />
-										<Skeleton className="h-4 w-3/4 mt-3" />
-										<Skeleton className="h-3 w-1/2" />
-										<Skeleton variant="round" className="h-5 w-20 mt-4" />
-									</div>
-								</>
-							) : matchedJobs.length === 0 ? (
-								<div className="col-span-3 rounded-2xl border border-dashed border-white/10 bg-white/5 p-6 text-center text-sm text-gray-500">
-									No matching jobs found yet. Add skills to your profile to see recommendations.
+
+									<Link to={`/jobs/${job.id}`} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-300">
+										See details
+										<ArrowUpRight className="h-3.5 w-3.5" />
+									</Link>
 								</div>
-							) : (
-								matchedJobs.map((job) => (
-									<div key={job.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-										<div className="flex items-start justify-between">
-											<span className={`flex h-8 w-8 items-center justify-center rounded-xl text-[10px] font-black text-white ${job.logoBg}`}>{job.logo}</span>
-											{hasResume ? (
-												<span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${job.matchScore >= 80 ? 'bg-indigo-500/10 text-indigo-300' : job.matchScore >= 60 ? 'bg-purple-500/10 text-purple-300' : 'bg-cyan-500/10 text-cyan-300'}`}>{job.matchScore}%</span>
-											) : (
-												<span className="rounded-full bg-cyan-500/10 px-2 py-1 text-[10px] font-semibold text-cyan-300">Internship</span>
-											)}
-										</div>
-										<div className="mt-3">
-											<div className="text-sm font-semibold text-white">{job.title}</div>
-											<div className="mt-1 text-xs text-gray-400">{job.company}</div>
-										</div>
-										<Link to={`/jobs/${job.id}`} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-300">
-											See details
-											<ArrowUpRight className="h-3.5 w-3.5" />
-										</Link>
-									</div>
-								))
-							)}
+							))}
 						</div>
 					</div>
 
@@ -400,12 +365,7 @@ export default function StudentDashboard() {
 							<Link to="/applications" className="text-sm font-semibold text-indigo-300 transition hover:text-indigo-200">Open tracker</Link>
 						</div>
 
-						{appsLoading ? (
-							<div className="mt-5 space-y-3">
-								<AppItemSkeleton />
-								<AppItemSkeleton />
-							</div>
-						) : studentApps.length > 0 ? (
+						{studentApps.length > 0 ? (
 							<div className="mt-5 space-y-4">
 								{studentApps.map((app) => {
 									const getStageInfo = (status) => {

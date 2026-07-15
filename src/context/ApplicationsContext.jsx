@@ -45,21 +45,18 @@ export const ApplicationsProvider = ({ children }) => {
   const getStorageKey = (id) => `cg_applications${id ? `:${id}` : ''}`;
 
   const [applications, setApplications] = useState(INITIAL_APPLICATIONS);
-  const [appsLoading, setAppsLoading]   = useState(false);
-  const [appsError, setAppsError]       = useState(false); // true = server unreachable
+  const [appsLoading, setAppsLoading] = useState(true);
 
   useEffect(() => {
     if (!userId) {
       setApplications(INITIAL_APPLICATIONS);
       setAppsLoading(false);
-      setAppsError(false);
       localStorage.removeItem('cg_applications');
       return;
     }
 
     const fetchApps = async () => {
       setAppsLoading(true);
-      setAppsError(false);
       try {
         const token = await getAuthToken();
         const res = await fetch(`${API_BASE}/api/applications`, { headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) } });
@@ -73,11 +70,9 @@ export const ApplicationsProvider = ({ children }) => {
           return;
         }
       } catch {
-        // network error — fall back to localStorage, signal error
-        setAppsError(true);
+        // ignore network errors and fall back to a user's saved local applications only if present
       }
 
-      // localStorage fallback
       const storageKey = getStorageKey(userId);
       const saved = localStorage.getItem(storageKey);
       if (saved) {
@@ -231,7 +226,7 @@ export const ApplicationsProvider = ({ children }) => {
   };
 
   return (
-    <ApplicationsContext.Provider value={{ applications, appsLoading, appsError, applyToJob, updateApplicationStatus }}>
+    <ApplicationsContext.Provider value={{ applications, appsLoading, applyToJob, updateApplicationStatus }}>
       {children}
     </ApplicationsContext.Provider>
   );

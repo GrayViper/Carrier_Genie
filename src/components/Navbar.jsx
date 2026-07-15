@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { 
-  Menu, X, LogOut, User, Briefcase, FileText, 
-  CheckSquare, Shield, Sparkles, RefreshCw 
+import { hasStoredResume } from '../utils/resumeStorage';
+import {
+  Menu, X, LogOut, User, Briefcase, FileText,
+  CheckSquare, Shield, Sparkles, RefreshCw
 } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout, switchRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const hasResume = user?.role === 'student'
+    ? Boolean(hasStoredResume(user.id) || user.resumeUploaded)
+    : false;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -69,20 +73,22 @@ export default function Navbar() {
                     <FileText className="w-4 h-4" />
                     Resume AI
                   </Link>
-                  <Link 
-                    to="/jobs" 
+                  <Link
+                    to="/jobs"
                     className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive('/jobs') ? 'text-indigo-400 bg-white/5' : 'text-gray-300 hover:text-white'}`}
                   >
                     <Briefcase className="w-4 h-4" />
                     Find Jobs
                   </Link>
-                  <Link 
-                    to="/applications" 
-                    className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-colors ${isActive('/applications') ? 'bg-white/10 text-indigo-400' : 'text-gray-300 hover:bg-white/5 hover:text-white'}`}
-                  >
-                    <CheckSquare className="w-4 h-4" />
-                    Applications
-                  </Link>
+                  {hasResume && (
+                    <Link
+                      to="/applications"
+                      className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-colors ${isActive('/applications') ? 'bg-white/10 text-indigo-400' : 'text-gray-300 hover:bg-white/5 hover:text-white'}`}
+                    >
+                      <CheckSquare className="w-4 h-4" />
+                      Applications
+                    </Link>
+                  )}
                 </>
               ) : user.role === 'recruiter' ? (
                 <>
@@ -184,7 +190,9 @@ export default function Navbar() {
                     <Link to="/dashboard/student" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Dashboard</Link>
                     <Link to="/resume" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Resume AI</Link>
                     <Link to="/jobs" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Find Jobs</Link>
-                    <Link to="/applications" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Applications</Link>
+                    {hasResume && (
+                      <Link to="/applications" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Applications</Link>
+                    )}
                   </>
                 )}
                 {user.role === 'recruiter' && (
