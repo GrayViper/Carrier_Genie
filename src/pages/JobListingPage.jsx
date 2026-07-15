@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import { useJobs } from '../context/useJobs';
 import { useAuth } from '../context/useAuth';
 import { useApplications } from '../context/useApplications';
-import { Search, MapPin, DollarSign, Calendar, ChevronRight, Sparkles, Briefcase, TrendingUp, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Search, MapPin, DollarSign, Calendar, ChevronRight, Sparkles, Briefcase, TrendingUp, Bookmark, BookmarkCheck, WifiOff, RefreshCw } from 'lucide-react';
 import { getDeadlineInsight, getSavedJobs, toggleSavedJob } from '../utils/studentJourney';
+import { JobCardSkeleton } from '../components/Skeleton';
 
 export default function JobListingPage() {
-  const { jobs, calculateMatchScore } = useJobs();
+  const { jobs, jobsLoading, jobsError, fetchJobs, calculateMatchScore } = useJobs();
   const { user } = useAuth();
   const { applications } = useApplications();
 
@@ -30,11 +31,9 @@ export default function JobListingPage() {
         job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.description.toLowerCase().includes(searchTerm.toLowerCase());
-
       const matchesType = roleType === 'All' || job.type === roleType;
       const matchesSkill = skillFilter === 'All' || job.skills.some((s) => s.toLowerCase() === skillFilter.toLowerCase());
       const matchesMatchScore = job.matchScore >= matchScoreMin;
-
       return matchesSearch && matchesType && matchesSkill && matchesMatchScore;
     });
 
@@ -58,12 +57,19 @@ export default function JobListingPage() {
           <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-gray-300">
             <div className="flex items-center gap-2 text-indigo-300">
               <TrendingUp className="w-4 h-4" />
-              <span className="font-semibold">{filteredJobs.length} active opportunities</span>
+              {jobsLoading ? (
+                <span className="font-semibold text-gray-500">Loading opportunities...</span>
+              ) : (
+                <span className="font-semibold">{filteredJobs.length} active opportunities</span>
+              )}
             </div>
-            <div className="mt-1 text-xs text-gray-500">Updated for your current interests</div>
+            <div className="mt-1 text-xs text-gray-500">
+              {jobsError ? 'Showing cached listings — server unreachable' : 'Updated for your current interests'}
+            </div>
           </div>
         </div>
 
+        {/* Search + filters */}
         <div className="mt-8 rounded-[24px] border border-white/10 bg-white/5 p-5">
           <div className="relative text-sm">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-500">
@@ -125,25 +131,73 @@ export default function JobListingPage() {
         </div>
       </div>
 
+      {/* Server-down banner — only when error AND no cached jobs */}
+      {jobsError && activeJobs.length === 0 && (
+        <div className="mt-6 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-6 text-center">
+          <WifiOff className="mx-auto h-8 w-8 text-rose-400 mb-3 opacity-70" />
+          <p className="text-sm font-semibold text-rose-200">Unable to load job listings</p>
+          <p className="mt-1 text-xs text-rose-300/70">The server is currently unreachable. Try again in a moment.</p>
+          <button
+            type="button"
+            onClick={fetchJobs}
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-rose-500/20 border border-rose-400/30 px-4 py-2 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/30"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Stale-data notice — error but cached jobs are showing */}
+      {jobsError && activeJobs.length > 0 && (
+        <div className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+          <div className="flex items-center gap-2">
+            <WifiOff className="h-3.5 w-3.5 shrink-0 text-amber-300" />
+            <span>Showing cached listings — server unreachable. Some roles may be outdated.</span>
+          </div>
+          <button
+            type="button"
+            onClick={fetchJobs}
+            className="flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 font-semibold transition hover:bg-amber-500/20 shrink-0"
+          >
+            <RefreshCw className="h-3 w-3" />
+            Retry
+          </button>
+        </div>
+      )}
+
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-sm text-gray-500">
-        <span>Showing {filteredJobs.length} tailored opportunities</span>
+        {jobsLoading ? (
+          <span className="text-gray-600">Fetching listings...</span>
+        ) : (
+          <span>Showing {filteredJobs.length} tailored opportunities</span>
+        )}
         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-400">
           {studentApps.length} applications in progress
         </span>
       </div>
 
+      {/* Job cards grid */}
       <div className="mt-4 grid grid-cols-1 gap-4">
+
+        {/* Skeleton state — loading and no cached data yet */}
+        {jobsLoading && activeJobs.length === 0 && (
+          Array.from({ length: 4 }).map((_, i) => (
+            <JobCardSkeleton key={i} />
+          ))
+        )}
+
+        {/* Actual job cards */}
         {filteredJobs.map((job) => {
           const isApplied = studentApps.some((app) => app.jobId === job.id);
           const appliedStatus = studentApps.find((app) => app.jobId === job.id)?.status;
-
           const deadlineInsight = getDeadlineInsight(job.deadline);
           const saved = savedJobIds.includes(job.id);
 
           return (
             <div
               key={job.id}
-              className="rounded-[24px] border border-white/10 bg-slate-950/70 p-5 transition hover:border-indigo-400/20 hover:bg-slate-900/80"
+              className="rounded-[24px] border border-white/10 bg-slate-950/70 p-5 transition hover:border-indigo-400/20 hover:bg-slate-900/80 animate-fade-up"
             >
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div className="flex flex-1 gap-4">
@@ -165,7 +219,6 @@ export default function JobListingPage() {
                     </div>
 
                     <p className="mt-1 text-sm font-semibold text-indigo-300">{job.company}</p>
-
                     <p className="mt-2 text-sm text-gray-400">{job.description}</p>
 
                     <div className="mt-4 flex flex-wrap items-center gap-4 text-[11px] text-gray-500">
@@ -238,9 +291,10 @@ export default function JobListingPage() {
           );
         })}
 
-        {filteredJobs.length === 0 && (
+        {/* Empty state — not loading, no error, just no matches */}
+        {!jobsLoading && !jobsError && filteredJobs.length === 0 && activeJobs.length > 0 && (
           <div className="rounded-[24px] border border-dashed border-white/10 bg-white/5 p-10 text-center text-sm text-gray-500">
-            No jobs match the current search and filters yet.
+            No jobs match your current filters. Try broadening your search.
           </div>
         )}
       </div>
