@@ -16,10 +16,10 @@ services:
         generator: random
       - key: FRONTEND_ORIGIN
         value: https://<your-vercel-domain>.vercel.app
-      - key: OPENAI_ENDPOINT
-        value: https://api.openai.com/v1/chat/completions
-      - key: OPENAI_MODEL
-        value: gpt-3.5-turbo
+      - key: GEMINI_MODEL
+        value: gemini-1.5-flash
+      - key: GEMINI_ENDPOINT
+        value: https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent
     healthCheckPath: /ready
     port: $PORT
     instanceCount: 1

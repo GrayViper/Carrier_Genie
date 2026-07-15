@@ -341,3 +341,46 @@ Files created/modified:
 - Render free tier spins down after 15 minutes of inactivity. First request after idle takes 30–60s. The `ServerStatusBanner` detects and communicates this to users as "Server waking up".
 - MongoDB Atlas free tier (M0) persists all data permanently. No data loss on Render restarts.
 - OpenAI replaced with Gemini is deferred post-deployment (tracked in TODO.md).
+
+---
+
+## 2026-07-15 — Replaced OpenAI with Google Gemini API for resume analysis
+
+**Motivation:** OpenAI requires a paid subscription. Gemini (via Google AI Studio) offers a free tier with generous limits, making it a better fit for this project.
+
+**What changed:**
+
+`server/ai/analysis.py`
+- Removed all OpenAI-related code (`OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_ENDPOINT`, `openai_analyze`, `analyze_with_openai`).
+- Added `gemini_analyze()` — calls the Gemini `generateContent` REST API directly using `urllib.request` (no extra dependencies).
+- Prompt instructs Gemini to return a strict JSON object with `score`, `atsScore`, `skills`, `strengths`, `weaknesses`, `suggestions`.
+- Added markdown code fence stripping in case Gemini wraps the JSON in triple backticks.
+- `analysisType` field now reports `'gemini'` when AI analysis succeeds, `'python-nlp'` when falling back to local keyword analysis.
+- Local keyword fallback still runs first and is used as the result if `GEMINI_API_KEY` is not set or Gemini call fails — the app always returns a valid analysis regardless of backend AI availability.
+
+`.env.example`
+- Removed `OPENAI_API_KEY`, `OPENAI_ENDPOINT`, `OPENAI_MODEL`.
+- Added `GEMINI_API_KEY`, `GEMINI_MODEL` (default: `gemini-1.5-flash`), `GEMINI_ENDPOINT` with a link to AI Studio for key generation.
+
+`render.yaml`
+- Removed `OPENAI_ENDPOINT` and `OPENAI_MODEL` env var entries.
+- Added `GEMINI_MODEL` and `GEMINI_ENDPOINT` env var entries.
+- `GEMINI_API_KEY` is intentionally not committed — must be added manually in Render's dashboard under Environment Variables (treat as a secret).
+
+**How to get a Gemini API key (free):**
+1. Go to https://aistudio.google.com/app/apikey
+2. Sign in with a Google account
+3. Click "Create API key" — copy the key
+4. In Render dashboard → your service → Environment → add `GEMINI_API_KEY` = your key
+5. Redeploy — resume analysis will now use Gemini AI
+
+**Fallback behaviour:**
+- If `GEMINI_API_KEY` is not set → local Python keyword analysis runs (score, skills, strengths/weaknesses based on keyword matching).
+- If Gemini call fails (network error, quota exceeded) → same local fallback, error printed to stderr only.
+- Frontend is unaffected either way — it always receives a valid analysis response.
+
+**Files modified:**
+- `server/ai/analysis.py`
+- `.env.example`
+- `render.yaml`
+- `TODO.md` — moved Gemini task from Remaining to Completed
