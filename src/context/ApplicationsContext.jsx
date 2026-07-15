@@ -45,15 +45,21 @@ export const ApplicationsProvider = ({ children }) => {
   const getStorageKey = (id) => `cg_applications${id ? `:${id}` : ''}`;
 
   const [applications, setApplications] = useState(INITIAL_APPLICATIONS);
+  const [appsLoading, setAppsLoading]   = useState(false);
+  const [appsError, setAppsError]       = useState(false); // true = server unreachable
 
   useEffect(() => {
     if (!userId) {
       setApplications(INITIAL_APPLICATIONS);
+      setAppsLoading(false);
+      setAppsError(false);
       localStorage.removeItem('cg_applications');
       return;
     }
 
     const fetchApps = async () => {
+      setAppsLoading(true);
+      setAppsError(false);
       try {
         const token = await getAuthToken();
         const res = await fetch(`${API_BASE}/api/applications`, { headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) } });
@@ -63,12 +69,15 @@ export const ApplicationsProvider = ({ children }) => {
           setApplications(filtered);
           localStorage.setItem(getStorageKey(userId), JSON.stringify(filtered));
           localStorage.removeItem('cg_applications');
+          setAppsLoading(false);
           return;
         }
       } catch {
-        // ignore network errors and fall back to a user's saved local applications only if present
+        // network error — fall back to localStorage, signal error
+        setAppsError(true);
       }
 
+      // localStorage fallback
       const storageKey = getStorageKey(userId);
       const saved = localStorage.getItem(storageKey);
       if (saved) {
@@ -76,6 +85,7 @@ export const ApplicationsProvider = ({ children }) => {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed)) {
             setApplications(parsed);
+            setAppsLoading(false);
             return;
           }
         } catch {
@@ -92,6 +102,7 @@ export const ApplicationsProvider = ({ children }) => {
             localStorage.setItem(storageKey, JSON.stringify(filtered));
             localStorage.removeItem('cg_applications');
             setApplications(filtered);
+            setAppsLoading(false);
             return;
           }
         } catch {
@@ -101,6 +112,7 @@ export const ApplicationsProvider = ({ children }) => {
 
       setApplications(INITIAL_APPLICATIONS);
       localStorage.setItem(storageKey, JSON.stringify(INITIAL_APPLICATIONS));
+      setAppsLoading(false);
     };
 
     fetchApps();
@@ -219,7 +231,7 @@ export const ApplicationsProvider = ({ children }) => {
   };
 
   return (
-    <ApplicationsContext.Provider value={{ applications, applyToJob, updateApplicationStatus }}>
+    <ApplicationsContext.Provider value={{ applications, appsLoading, appsError, applyToJob, updateApplicationStatus }}>
       {children}
     </ApplicationsContext.Provider>
   );

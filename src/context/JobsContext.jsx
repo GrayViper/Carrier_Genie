@@ -132,15 +132,18 @@ export const JobsProvider = ({ children }) => {
     const saved = localStorage.getItem('cg_jobs');
     return saved ? JSON.parse(saved) : INITIAL_JOBS;
   });
+  const [jobsLoading, setJobsLoading] = useState(true);
+  const [jobsError, setJobsError]     = useState(false); // true = server unreachable
 
   // Fetch jobs from mock API and replace local list if available
   const fetchJobs = async () => {
+    setJobsLoading(true);
+    setJobsError(false);
     try {
       const token = await getAuthToken();
       const res = await fetch(`${API_BASE}/api/jobs`, { headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) } });
       const data = await res.json();
       if (res.ok && data.jobs && Array.isArray(data.jobs)) {
-        // map remote shape to local job shape with reasonable defaults
         const mapped = data.jobs.map(j => ({
           id: j.id,
           title: j.title,
@@ -159,7 +162,10 @@ export const JobsProvider = ({ children }) => {
         setJobs(mapped);
       }
     } catch {
-      // network error - keep local jobs
+      // network error — keep cached/fallback jobs, signal error
+      setJobsError(true);
+    } finally {
+      setJobsLoading(false);
     }
   };
 
@@ -221,7 +227,7 @@ export const JobsProvider = ({ children }) => {
   };
 
   return (
-    <JobsContext.Provider value={{ jobs, addJob, approveJob, rejectJob, getJobById, calculateMatchScore, fetchJobs }}>
+    <JobsContext.Provider value={{ jobs, jobsLoading, jobsError, addJob, approveJob, rejectJob, getJobById, calculateMatchScore, fetchJobs }}>
       {children}
     </JobsContext.Provider>
   );
