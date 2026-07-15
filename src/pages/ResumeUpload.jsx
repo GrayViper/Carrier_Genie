@@ -62,47 +62,98 @@ export default function ResumeUpload() {
     setParsing(true);
     setParsingStep(0);
 
-    // Step through each parsing stage with a fixed delay then finish
+    // Step through visual parsing stages while backend does real analysis in parallel
     let step = 0;
     const advance = () => {
       step += 1;
       if (step < steps.length) {
         setParsingStep(step);
         setTimeout(advance, 800);
-      } else {
-        finishParsing();
       }
+      // don't call finishParsing here — we wait for the API response
     };
     setTimeout(advance, 800);
+
+    // Fire the actual backend analysis immediately in parallel
+    runBackendAnalysis();
   };
 
-  const finishParsing = () => {
-    setParsing(false);
-    if (!user) return; // safety guard — should never happen but prevents session wipe
-    
-    // Mock parsing results and skills to append
-    const parsedSkills = ['React', 'JavaScript', 'HTML/CSS', 'UX Design', 'Figma', 'Python', 'Tailwind CSS', 'Git'];
-    const feedback = {
-      score: 88,
-      strengths: [
-        'Strong showcase of modern frontend technologies (React, JavaScript).',
-        'Figma and user experience layout elements are highlighted exceptionally.',
-        'Well-formatted file naming convention and structured design layout.'
-      ],
-      weaknesses: [
-        'Lacks cloud container knowledge (Docker/Kubernetes).',
-        'SQL database structures and relationships could be further detailed.',
-        'Minimal automated unit testing references (Jest).'
-      ],
-      suggestions: [
-        'Incorporate a Docker setup container in one of your portfolio projects.',
-        'Detail queries and databases used in your full-stack projects.',
-        'Include a testing section mentioning experience with testing libraries.'
-      ]
+  const runBackendAnalysis = async () => {
+    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5178';
+
+    // Fallback feedback used when backend is unreachable
+    const fallbackFeedback = {
+      score: 76,
+      atsScore: 72,
+      skills: ['Git', 'JavaScript'],
+      strengths: ['Clear project descriptions with strong frontend focus.', 'Demonstrates collaboration and modern tooling awareness.'],
+      weaknesses: ['Limited cloud deployment detail.', 'No explicit backend testing framework shown.'],
+      suggestions: ['Add a Docker or cloud deployment example.', 'Mention testing tools or automation experience.'],
+      analysisType: 'fallback'
     };
 
-    setReport(feedback);
-    setReportScore(feedback.score);
+    try {
+      const token = await getAuthToken();
+
+      // Step 1 — submit the resume, get a jobId back
+      const uploadRes = await fetch(`${API_BASE}/api/resume`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ studentId: user?.id, fileName: file.name, contentBase64: fileBase64 })
+      });
+
+      if (!uploadRes.ok) {
+        finishParsing(fallbackFeedback);
+        return;
+      }
+
+      const { jobId } = await uploadRes.json();
+
+      // Step 2 — poll for the analysis result (max 30s)
+      const maxAttempts = 30;
+      for (let i = 0; i < maxAttempts; i++) {
+        await new Promise(r => setTimeout(r, 1000));
+        try {
+          const statusRes = await fetch(`${API_BASE}/api/resume/status/${jobId}`, {
+            headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+          });
+          if (statusRes.ok) {
+            const { job } = await statusRes.json();
+            if (job?.status === 'done') {
+              finishParsing({
+                score: job.score || 76,
+                atsScore: job.atsScore || 72,
+                skills: job.analysis?.skills || [],
+                strengths: job.analysis?.strengths || fallbackFeedback.strengths,
+                weaknesses: job.analysis?.weaknesses || fallbackFeedback.weaknesses,
+                suggestions: job.analysis?.suggestions || fallbackFeedback.suggestions,
+                analysisType: 'gemini'
+              });
+              return;
+            }
+            if (job?.status === 'error') break;
+          }
+        } catch {
+          // keep polling
+        }
+      }
+
+      // Timed out or errored — show fallback
+      finishParsing(fallbackFeedback);
+    } catch {
+      finishParsing(fallbackFeedback);
+    }
+  };
+
+  const finishParsing = (analysisResult) => {
+    if (!user) return;
+
+    const feedback = {
+      score: analysisResult.score,
+      strengths: analysisResult.strengths,
+      weaknesses: analysisResult.weaknesses,
+      suggestions: analysisResult.suggestions
+    };
 
     const storedResume = saveStoredResume(user?.id, {
       fileName: file.name,
@@ -112,53 +163,29 @@ export default function ResumeUpload() {
       uploadedAt: new Date().toISOString()
     });
 
-    // Save in user profile context and attempt to persist to mock API
     const newProfile = {
       resumeUploaded: Boolean(storedResume),
       resumeName: file.name,
-      resumeScore: feedback.score,
-      skills: parsedSkills,
-      feedback: feedback
+      resumeScore: analysisResult.score,
+      skills: analysisResult.skills?.length ? analysisResult.skills : (user.skills || []),
+      feedback
     };
 
-    // calculate ATS score and suggestions
     try {
-      const calc = calculateAtsScore(parsedSkills, feedback.score);
-      const sug = generateAtsSuggestions(parsedSkills, feedback, calc);
-      setAtsScore(calc);
+      const calc = calculateAtsScore(newProfile.skills, analysisResult.score);
+      const sug = generateAtsSuggestions(newProfile.skills, feedback, calc);
+      setAtsScore(analysisResult.atsScore || calc);
       setAtsSuggestions(sug);
-      newProfile.atsScore = calc;
-      newProfile.atsSuggestions = sug;
+      newProfile.atsScore = analysisResult.atsScore || calc;
     } catch {
-      // ignore
+      setAtsScore(analysisResult.atsScore || 72);
     }
 
-    // optimistic update
+    // Set report and score BEFORE clearing parsing state to avoid blank flash
+    setReport(feedback);
+    setReportScore(analysisResult.score);
     updateUserProfile(newProfile);
-
-    // send to mock API if available
-    (async () => {
-      const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5178';
-      try {
-        const token = await getAuthToken();
-        const res = await fetch(`${API_BASE}/api/resume`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-          body: JSON.stringify({ studentId: user?.id, fileName: file.name, contentBase64: fileBase64 })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          // Only update profile if the server returns a valid user object with role intact
-          if (data.user && data.user.id && data.user.role) {
-            updateUserProfile(data.user);
-            if (data.user.atsScore) setAtsScore(data.user.atsScore);
-            if (data.user.atsSuggestions) setAtsSuggestions(data.user.atsSuggestions || []);
-          }
-        }
-      } catch {
-        // ignore network errors — optimistic update already applied
-      }
-    })();
+    setParsing(false);
   };
 
   const handleDownloadReport = () => {
@@ -250,6 +277,12 @@ export default function ResumeUpload() {
                   <span>{step}</span>
                 </div>
               ))}
+              {parsingStep >= steps.length - 1 && (
+                <div className="flex items-center gap-1.5 text-amber-300 animate-fade-in pt-1 border-t border-white/5 mt-1">
+                  <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />
+                  <span>Waiting for Gemini AI analysis...</span>
+                </div>
+              )}
             </div>
           )}
         </div>
