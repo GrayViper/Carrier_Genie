@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import { verifyToken } from '@clerk/backend';
-import { connectMongo, getDb } from './mongo_client.js';
+import { connectMongo, getDb, closeMongo } from './mongo_client.js';
 import { createBackgroundJobStore } from './mcp/background-mcp-server.js';
 
 const PORT = process.env.MOCK_PORT || 5178;
