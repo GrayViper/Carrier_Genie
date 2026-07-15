@@ -240,3 +240,104 @@ Contact the agent
 - Added a backend async error middleware test and verified with `npm test -- --run server/mock-server.test.js`.
 - Updated `TODO.md` to mark completed backend audit, backend health/metrics, JWT authentication hardening, and MongoDB persistence tasks.
 
+
+---
+
+## 2026-07-15 — Bug fixes, deployment setup, and resilient frontend (session)
+
+### Bug fixes
+
+**Application tracker showing empty / blank page after resume upload**
+- Root cause: the empty-state in `ApplicationTracker.jsx` used `.glass-panel` with `border-white/5` — `rgba(255,255,255,0.02)` background on a dark page, effectively invisible.
+- Fix: replaced with an explicit `bg-slate-900/60 border-white/10` card, added a proper heading and icon, improved empty-state copy based on resume status.
+- File modified: `src/pages/ApplicationTracker.jsx`
+
+**Refresh on `/applications` redirecting to login**
+- Root cause 1: `AuthContext.jsx` had two duplicate `useEffect` blocks both restoring `cg_user` from localStorage. The first called `setIsReady(true)` synchronously, causing a race where `user` was briefly `null` when child components rendered.
+- Root cause 2: No protected route wrapper — each page did its own ad-hoc auth check. `ApplicationTracker` had broken restore logic that only attempted session reload if *both* `cg_token` AND `cg_user` existed.
+- Fix: added `ProtectedRoute` component to `App.jsx` that waits for `isReady` before deciding to redirect. Removed duplicate `useEffect` from `AuthContext`. Stripped `ApplicationTracker`'s own restore logic entirely.
+- Files modified: `src/App.jsx`, `src/context/AuthContext.jsx`, `src/pages/ApplicationTracker.jsx`
+
+**Apply button doing nothing / application page crashing**
+- Root cause 1: `applyToJob` is `async` but was called without `await` in `JobDetailsPage`, so `res` was always a Promise, never the result object. `res.success` was always `undefined`.
+- Root cause 2: `createLocalApplication()` in `ApplicationsContext` was missing the `history` array. `ApplicationTracker` called `activeApp.history.map(...)` which threw `Cannot read properties of undefined`.
+- Root cause 3: `updateApplicationStatus` spread `...app.history` which crashes if history is missing on old cached data.
+- Fix: added `await` to `applyToJob` call; added `history: [{ status: 'Applied', ... }]` to `createLocalApplication()`; changed `...app.history` to `...(app.history || [])`.
+- Files modified: `src/pages/JobDetailsPage.jsx`, `src/context/ApplicationsContext.jsx`, `src/pages/ApplicationTracker.jsx`
+
+**Peer dependency conflicts blocking Render build**
+- `@testing-library/react@14` requires React 18, project uses React 19 → upgraded to `@testing-library/react@16`.
+- `@vitest/coverage-v8@4.x` requires `vitest@4.x`, project uses `vitest@1.x` → aligned to `@vitest/coverage-v8@1.5.4`.
+- Added `--legacy-peer-deps` to Render build command in `render.yaml` as safety net.
+- Files modified: `package.json`, `package-lock.json`, `render.yaml`
+
+**`vercel.json` version 3 rejected by Vercel**
+- Vercel only accepts version ≤ 2. Downgraded `"version": 3` to `"version": 2`.
+- File modified: `vercel.json`
+
+---
+
+### Deployment setup
+
+**Full deployment architecture established:**
+- Frontend → Vercel (`https://carrier-genie-vl9j.vercel.app`)
+- Backend → Render (`https://carrier-genie.onrender.com`)
+- Database → MongoDB Atlas (CareerGenie cluster, AWS Mumbai, free M0 tier)
+
+**Render backend issues resolved (in order):**
+1. `FRONTEND_ORIGIN` missing → server threw on startup. Fixed by adding env var in Render dashboard.
+2. Node.js 26 used by Render → TLS SSL alert 80 from MongoDB Atlas. Fixed by pinning `NODE_VERSION=20.19.0` in `render.yaml` and Render dashboard.
+3. MongoDB driver v5 incompatibility with Node 26 → upgraded to `mongodb@^6.17.0`.
+4. `closeMongo` imported but not exported → crash on startup. Fixed import.
+5. MongoDB Atlas Network Access only had home IP → Render's IPs blocked. Fixed by adding `0.0.0.0/0` in Atlas Network Access.
+6. `insertMany([])` throws in MongoDB v6 when array is empty → guarded all `insertMany` calls with length check in `ensureData()`.
+7. MongoDB not connected at startup → `getDb()` threw on `/ready` endpoint. Fixed by connecting MongoDB at server startup in `startServer()` async function.
+8. `FRONTEND_ORIGIN` had trailing slash → CORS mismatch. Fixed by stripping trailing slash in `getEnvSettings()`.
+
+**Files modified:** `server/mock-server.js`, `server/mongo_client.js`, `render.yaml`, `package.json`
+
+---
+
+### MongoDB Atlas integration
+
+- Connected Atlas cluster (CareerGenie, `careergenie.xmamuzy.mongodb.net`) via `MONGODB_URI` env var on Render and local `.env.local`.
+- All user registrations, applications, jobs, notifications, and resume results now persist permanently in Atlas regardless of Render restarts.
+- Server seeds initial data on first run if collections are empty.
+- `MONGODB_URI` added to `.env.local` for local development.
+
+---
+
+### Resilient frontend (in progress)
+
+Work started to make the frontend fully dynamic and resilient to backend downtime (Render free tier spins down after 15 min inactivity).
+
+**Completed so far:**
+- Added `@keyframes shimmer` animation and `.skeleton`, `.skeleton-round`, `.skeleton-card` CSS classes to `src/index.css`.
+- Created `src/components/Skeleton.jsx` with reusable components: `Skeleton`, `SkeletonLines`, `JobCardSkeleton`, `StatCardSkeleton`, `AppItemSkeleton`.
+- Created `src/hooks/useServerStatus.js` — polls `/health` every 30s (server up) or 10s (server down); exposes `serverStatus`, `isDown`, `isWaking`, `lastChecked`, `recheck()`.
+- Created `src/components/ServerStatusBanner.jsx` — sticky banner below navbar:
+  - Rose/red when server is unreachable, with Retry button and dismiss (×).
+  - Amber/yellow with spinner when server is waking up (Render cold start).
+  - Green "Back online" toast when server recovers.
+- Wired `ServerStatusBanner` into `App.jsx` via `useServerStatus`.
+- Started adding `jobsLoading` / `jobsError` state to `JobsContext`.
+
+**Remaining (added to TODO.md):**
+- Complete loading/error state in `JobsContext`, `ApplicationsContext`.
+- Add skeleton loaders to `JobListingPage`, `StudentDashboard`, `ApplicationTracker`, `AdminPanel`.
+- Improve `ProtectedRoute` loading screen from plain text to animated skeleton.
+
+Files created/modified:
+- `src/index.css` — shimmer animation + skeleton classes appended
+- `src/components/Skeleton.jsx` — new file
+- `src/hooks/useServerStatus.js` — new file
+- `src/components/ServerStatusBanner.jsx` — new file
+- `src/App.jsx` — imports and wires `ServerStatusBanner` + `useServerStatus`
+- `src/context/JobsContext.jsx` — `jobsLoading` / `jobsError` state added (partial)
+
+---
+
+### Notes
+- Render free tier spins down after 15 minutes of inactivity. First request after idle takes 30–60s. The `ServerStatusBanner` detects and communicates this to users as "Server waking up".
+- MongoDB Atlas free tier (M0) persists all data permanently. No data loss on Render restarts.
+- OpenAI replaced with Gemini is deferred post-deployment (tracked in TODO.md).
