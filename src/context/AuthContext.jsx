@@ -188,8 +188,9 @@ export const AuthProvider = ({ children }) => {
       const token = await getAuthToken();
       const res = await fetch(`${API_BASE}/api/users/${userId}`, { headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) } });
       const data = await res.json();
-      if (res.ok && data.user) {
-        setUser(data.user);
+      if (res.ok && data.user && data.user.id && data.user.role) {
+        // Merge with existing user to avoid wiping session fields
+        updateUserProfile(data.user);
         return data.user;
       }
       return null;

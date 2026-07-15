@@ -140,22 +140,22 @@ export default function ResumeUpload() {
       const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5178';
       try {
         const token = await getAuthToken();
-        await fetch(`${API_BASE}/api/resume`, {
+        const res = await fetch(`${API_BASE}/api/resume`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
           body: JSON.stringify({ studentId: user?.id, fileName: file.name, contentBase64: fileBase64 })
-        }).then(async (res) => {
-          if (res.ok) {
-            const data = await res.json();
-            if (data.user) {
-              updateUserProfile(data.user);
-              if (data.user.atsScore) setAtsScore(data.user.atsScore);
-              if (data.user.atsSuggestions) setAtsSuggestions(data.user.atsSuggestions || []);
-            }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          // Only update profile if the server returns a valid user object with role intact
+          if (data.user && data.user.id && data.user.role) {
+            updateUserProfile(data.user);
+            if (data.user.atsScore) setAtsScore(data.user.atsScore);
+            if (data.user.atsSuggestions) setAtsSuggestions(data.user.atsSuggestions || []);
           }
-        }).catch(() => {});
+        }
       } catch {
-        // ignore network errors
+        // ignore network errors — optimistic update already applied
       }
     })();
   };
