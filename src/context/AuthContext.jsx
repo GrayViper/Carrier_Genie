@@ -62,9 +62,9 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       localStorage.setItem('cg_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('cg_user');
     }
+    // intentionally not removing cg_user when null —
+    // logout() handles cleanup explicitly to avoid wiping session during re-renders
   }, [user]);
 
   useEffect(() => {
@@ -138,7 +138,9 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     setUser(null);
     clearClerkSessionStorage();
-    // Clear all per-user application cache so a new login starts fresh
+    // Explicitly clear all user-related localStorage on logout
+    localStorage.removeItem('cg_user');
+    localStorage.removeItem('cg_token');
     Object.keys(localStorage)
       .filter(k => k.startsWith('cg_applications'))
       .forEach(k => localStorage.removeItem(k));

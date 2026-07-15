@@ -62,22 +62,23 @@ export default function ResumeUpload() {
     setParsing(true);
     setParsingStep(0);
 
-    // Simulate scanning/parsing steps
-    const interval = setInterval(() => {
-      setParsingStep((prev) => {
-        if (prev < steps.length - 1) {
-          return prev + 1;
-        } else {
-          clearInterval(interval);
-          finishParsing();
-          return prev;
-        }
-      });
-    }, 800);
+    // Step through each parsing stage with a fixed delay then finish
+    let step = 0;
+    const advance = () => {
+      step += 1;
+      if (step < steps.length) {
+        setParsingStep(step);
+        setTimeout(advance, 800);
+      } else {
+        finishParsing();
+      }
+    };
+    setTimeout(advance, 800);
   };
 
   const finishParsing = () => {
     setParsing(false);
+    if (!user) return; // safety guard — should never happen but prevents session wipe
     
     // Mock parsing results and skills to append
     const parsedSkills = ['React', 'JavaScript', 'HTML/CSS', 'UX Design', 'Figma', 'Python', 'Tailwind CSS', 'Git'];
