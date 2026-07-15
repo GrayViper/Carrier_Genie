@@ -5,7 +5,7 @@ services:
     plan: starter
     region: oregon
     branch: main
-    buildCommand: npm ci
+    buildCommand: npm ci --legacy-peer-deps
     startCommand: npm run start
     envVars:
       - key: NODE_ENV
