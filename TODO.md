@@ -1,6 +1,7 @@
 # CareerGenie Project TODO
 
 ## Remaining
+- [ ] Replace OpenAI with Google Gemini API for resume analysis (free tier, post-deployment)
 - [ ] Authentication implementation and JWT login/signup flow
 - [ ] Resume upload and AI analysis workflow
 - [ ] Job matching algorithm and job recommendations
