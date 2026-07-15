@@ -14,6 +14,7 @@ export default function ResumeUpload() {
   
   const [file, setFile] = useState(null);
   const [fileBase64, setFileBase64] = useState(null);
+  const fileBase64Ref = React.useRef(null); // ref so runBackendAnalysis always gets latest value
   const [parsing, setParsing] = useState(false);
   const [atsScore, setAtsScore] = useState(user?.atsScore || 0);
   const [atsSuggestions, setAtsSuggestions] = useState([]);
@@ -30,18 +31,15 @@ export default function ResumeUpload() {
   ];
 
   const handleFileChange = (e) => {
-    // prevent file selection if profile is incomplete
-    if (!isProfileComplete()) return;
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
-      setReport(null); // Clear previous reports
-      // read file as base64 for upload
+      setReport(null);
       const reader = new FileReader();
       reader.onload = () => {
         const result = reader.result || '';
-        // result is data:[mime];base64,xxxxx - strip prefix
         const base64 = result.split(',')[1] || '';
         setFileBase64(base64);
+        fileBase64Ref.current = base64; // keep ref in sync for immediate use
       };
       reader.readAsDataURL(e.target.files[0]);
     }
@@ -80,6 +78,7 @@ export default function ResumeUpload() {
 
   const runBackendAnalysis = async () => {
     const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5178';
+    const base64 = fileBase64Ref.current; // use ref — state may not have committed yet
 
     // Fallback feedback used when backend is unreachable
     const fallbackFeedback = {
@@ -99,11 +98,11 @@ export default function ResumeUpload() {
       const uploadRes = await fetch(`${API_BASE}/api/resume`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ studentId: user?.id, fileName: file.name, contentBase64: fileBase64 })
+        body: JSON.stringify({ studentId: user?.id, fileName: file.name, contentBase64: base64 })
       });
 
       if (!uploadRes.ok) {
-        finishParsing(fallbackFeedback);
+        finishParsing(fallbackFeedback, base64);
         return;
       }
 
@@ -128,7 +127,7 @@ export default function ResumeUpload() {
                 weaknesses: job.analysis?.weaknesses || fallbackFeedback.weaknesses,
                 suggestions: job.analysis?.suggestions || fallbackFeedback.suggestions,
                 analysisType: 'gemini'
-              });
+              }, base64);
               return;
             }
             if (job?.status === 'error') break;
@@ -139,13 +138,13 @@ export default function ResumeUpload() {
       }
 
       // Timed out or errored — show fallback
-      finishParsing(fallbackFeedback);
+      finishParsing(fallbackFeedback, base64);
     } catch {
-      finishParsing(fallbackFeedback);
+      finishParsing(fallbackFeedback, base64);
     }
   };
 
-  const finishParsing = (analysisResult) => {
+  const finishParsing = (analysisResult, base64) => {
     if (!user) return;
 
     const feedback = {
@@ -157,7 +156,7 @@ export default function ResumeUpload() {
 
     const storedResume = saveStoredResume(user?.id, {
       fileName: file.name,
-      contentBase64: fileBase64,
+      contentBase64: base64 || fileBase64Ref.current || '',
       mimeType: file.type || 'application/pdf',
       size: file.size,
       uploadedAt: new Date().toISOString()
@@ -221,8 +220,8 @@ export default function ResumeUpload() {
                   type="file" 
                   accept=".pdf"
                   onChange={handleFileChange}
-                  className={`absolute inset-0 opacity-0 ${!isProfileComplete() || parsing ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                  disabled={!isProfileComplete() || parsing}
+                  className={`absolute inset-0 opacity-0 ${parsing ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                  disabled={parsing}
                 />
                 <Upload className="w-10 h-10 text-gray-500 mb-3" />
                 <span className="text-white font-semibold block mb-1">
