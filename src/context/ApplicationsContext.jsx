@@ -79,7 +79,9 @@ export const ApplicationsProvider = ({ children }) => {
         try {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed)) {
-            setApplications(parsed);
+            // Extra safety: only keep applications that belong to this user
+            const filtered = parsed.filter(app => app.studentId === userId);
+            setApplications(filtered);
             setAppsLoading(false);
             return;
           }

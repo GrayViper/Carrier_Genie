@@ -83,7 +83,6 @@ export const AuthProvider = ({ children }) => {
   const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5178';
 
   const login = async (email, password, role) => {
-    setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
@@ -98,9 +97,7 @@ export const AuthProvider = ({ children }) => {
       return data.user;
     } catch (error) {
       setLoading(false);
-      if (error?.name === 'TypeError' && error?.message?.includes('fetch')) {
-        throw new Error('Network error: Failed to reach the server.');
-      }
+      // Surface the original error to caller. Do not perform demo/silent fallback here.
       throw error;
     }
   };
@@ -121,9 +118,7 @@ export const AuthProvider = ({ children }) => {
       return data.user;
     } catch (error) {
       setLoading(false);
-      if (error?.name === 'TypeError' && error?.message?.includes('fetch')) {
-        throw new Error('Network error: Failed to reach the server.');
-      }
+      // Surface the original error to caller. Do not perform demo/silent fallback here.
       throw error;
     }
   };
@@ -143,6 +138,10 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     setUser(null);
     clearClerkSessionStorage();
+    // Clear all per-user application cache so a new login starts fresh
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('cg_applications'))
+      .forEach(k => localStorage.removeItem(k));
 
     if (clerkLoaded) {
       try {
