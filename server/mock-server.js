@@ -479,6 +479,9 @@ function setupRoutes(app) {
     if (user && user.passwordHash && password) {
       const ok = await bcrypt.compare(password, user.passwordHash);
       if (!ok) return res.status(401).json({ error: 'invalid credentials' });
+    } else if (user && !user.passwordHash && password) {
+      // User exists but has no password set (seed/demo user) — reject with helpful message
+      return res.status(401).json({ error: 'invalid credentials' });
     } else if (!isProduction && allowDevAuth && role) {
       user = data.users.find(u => u.role === role);
       if (!user) return res.status(401).json({ error: 'invalid credentials' });
