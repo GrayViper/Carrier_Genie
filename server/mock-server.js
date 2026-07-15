@@ -229,9 +229,9 @@ async function ensureData() {
     ]);
     if (usersCount + jobsCount + appsCount + resumeCount === 0) {
       const initial = getInitialData();
-      await db.collection('users').insertMany(initial.users);
-      await db.collection('jobs').insertMany(initial.jobs);
-      await db.collection('applications').insertMany(initial.applications);
+      if (initial.users.length) await db.collection('users').insertMany(initial.users);
+      if (initial.jobs.length) await db.collection('jobs').insertMany(initial.jobs);
+      if (initial.applications.length) await db.collection('applications').insertMany(initial.applications);
       await db.collection('resumeResults').deleteMany({});
     }
     return;
