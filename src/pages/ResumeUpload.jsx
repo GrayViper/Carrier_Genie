@@ -232,20 +232,11 @@ export default function ResumeUpload() {
                 </span>
               </div>
 
-              {!isProfileComplete() && (
-                <div className="rounded-lg border border-amber-400/20 bg-amber-400/5 p-3 text-sm text-amber-200">
-                  <div className="mb-1 font-semibold">Complete your profile to upload a resume</div>
-                  <div className="text-xs text-amber-100/80 mb-3">Please add your major, expected graduation year, and at least one skill in your profile.</div>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={() => navigate('/dashboard/student')} className="rounded-full bg-amber-400/70 px-3 py-1 text-sm font-semibold text-slate-900">Complete profile</button>
-                    <button type="button" onClick={() => { updateUserProfile({}); }} className="rounded-full border border-amber-400/20 px-3 py-1 text-sm text-amber-100">Remind me later</button>
-                  </div>
-                </div>
-              )}
+
 
               <button
                 type="submit"
-                disabled={!file || parsing || !isProfileComplete()}
+                disabled={!file || parsing}
                 className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-gray-600 text-white font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer"
               >
                 {parsing ? (
