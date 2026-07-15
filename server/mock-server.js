@@ -14,6 +14,53 @@ const DATA_PATH = path.join(process.cwd(), 'server', 'data.json');
 const PYTHON_CMD = process.env.PYTHON_PATH || 'python';
 const AI_ANALYZER_SCRIPT = path.join(process.cwd(), 'server', 'ai', 'analysis.py');
 
+async function analyzeResumeWithGemini(contentBase64, fileName) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY not set');
+
+  const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  // Decode base64 → text (best-effort; PDFs may be binary but we pass what we can)
+  let resumeText = '';
+  try {
+    resumeText = Buffer.from(contentBase64, 'base64').toString('utf-8').slice(0, 6000);
+  } catch {
+    resumeText = `Resume file: ${fileName}`;
+  }
+
+  const prompt =
+    'You are an expert resume reviewer for a tech recruitment platform. ' +
+    'Analyse the resume text below and return ONLY a valid JSON object with exactly these keys: ' +
+    'score (integer 0-100), atsScore (integer 0-100), skills (array of strings), ' +
+    'strengths (array of strings), weaknesses (array of strings), suggestions (array of strings). ' +
+    'Do not include markdown, code fences, or any other text.\n\nResume text:\n\n' + resumeText;
+
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.2, maxOutputTokens: 1024 }
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    throw new Error(`Gemini API error ${res.status}: ${errText}`);
+  }
+
+  const data = await res.json();
+  let raw = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+  // Strip accidental markdown fences
+  raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+  const parsed = JSON.parse(raw);
+  if (typeof parsed !== 'object' || parsed === null) throw new Error('Gemini returned non-object JSON');
+  return { ...parsed, analysisType: 'gemini' };
+}
+
 async function analyzeResumeWithPython(contentBase64, fileName) {
   return new Promise((resolve, reject) => {
     const child = spawn(PYTHON_CMD, [AI_ANALYZER_SCRIPT], { stdio: ['pipe', 'pipe', 'pipe'] });
@@ -53,14 +100,30 @@ function simulateResumeAnalysis() {
 }
 
 async function tryAnalyzeResume(contentBase64, fileName) {
-  try {
-    return await analyzeResumeWithPython(contentBase64, fileName);
-  } catch (err) {
-    // If AI integration is not configured or fails, fall back to the existing simulated analyzer.
-    // eslint-disable-next-line no-console
-    console.warn('Resume analysis AI integration failed:', err.message || err);
-    return simulateResumeAnalysis();
+  // 1. Try Gemini (free tier, preferred)
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const result = await analyzeResumeWithGemini(contentBase64, fileName);
+      // eslint-disable-next-line no-console
+      console.log('Resume analysis completed via Gemini');
+      return result;
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('Gemini analysis failed, falling back to Python:', err.message || err);
+    }
   }
+
+  // 2. Try Python script (OpenAI or local NLP depending on env)
+  try {
+    const result = await analyzeResumeWithPython(contentBase64, fileName);
+    return result;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn('Python analysis failed, using simulation:', err.message || err);
+  }
+
+  // 3. Simulation fallback
+  return simulateResumeAnalysis();
 }
 
 function getInitialData() {

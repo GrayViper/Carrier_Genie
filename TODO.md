@@ -1,7 +1,7 @@
 # CareerGenie Project TODO
 
 ## Remaining
-- [ ] Replace OpenAI with Google Gemini API for resume analysis (free tier, post-deployment)
+- [x] Replace OpenAI with Google Gemini API for resume analysis (free tier)
 - [ ] Add skeleton loaders and loading states to JobsContext, ApplicationsContext (task 4 of resilient frontend)
 - [ ] Add skeleton loaders to JobListingPage, StudentDashboard, ApplicationTracker, AdminPanel (task 5-8 of resilient frontend)
 - [ ] Improve ProtectedRoute loading screen from plain text to skeleton (task 9 of resilient frontend)
@@ -22,6 +22,7 @@
 - [x] Tech: Database — MongoDB
 - [x] Tech: Database — MongoDB (indexes added)
 - [x] Tech: Authentication — JWT + Bcrypt
+- [x] Replace OpenAI with Google Gemini API for resume analysis (free tier)
 - [x] Tech: AI — Python NLP / OpenAI API integration
 - [x] Tech: Deployment — Vercel + Render
 - [x] Tech: CI/CD — GitHub Actions
