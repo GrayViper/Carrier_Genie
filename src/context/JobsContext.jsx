@@ -127,6 +127,7 @@ const INITIAL_JOBS = [
 
 export const JobsProvider = ({ children }) => {
   const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5178';
+  const { getAuthToken } = useAuth();
 
   const [jobs, setJobs] = useState(() => {
     const saved = localStorage.getItem('cg_jobs');
@@ -157,7 +158,9 @@ export const JobsProvider = ({ children }) => {
           requirements: j.requirements || [],
           salary: j.salary || 'Competitive',
           deadline: j.deadline || 'TBD',
-          status: j.status || 'active'
+          status: j.status || 'active',
+          posterId: j.posterId || null,
+          posterName: j.posterName || null
         }));
         setJobs(mapped);
       }
@@ -169,7 +172,6 @@ export const JobsProvider = ({ children }) => {
     }
   };
 
-  const { getAuthToken } = useAuth();
 
   useEffect(() => {
     fetchJobs();
@@ -180,7 +182,54 @@ export const JobsProvider = ({ children }) => {
     localStorage.setItem('cg_jobs', JSON.stringify(jobs));
   }, [jobs]);
 
-  const addJob = (jobData) => {
+  const addJob = async (jobData) => {
+    const token = await getAuthToken();
+    try {
+      const res = await fetch(`${API_BASE}/api/jobs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          title: jobData.title,
+          company: jobData.company,
+          location: jobData.location,
+          type: jobData.type,
+          skills: jobData.skills,
+          requirements: jobData.requirements,
+          salary: jobData.salary,
+          deadline: jobData.deadline,
+          posterId: jobData.posterId,
+          posterName: jobData.posterName,
+          status: jobData.status || 'pending_approval'
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.job) {
+        const j = data.job;
+        const mapped = {
+          id: j.id,
+          title: j.title,
+          company: j.company,
+          logo: j.logo || (j.company && j.company[0]) || 'J',
+          logoBg: j.logoBg || 'bg-indigo-600',
+          location: j.location || 'Remote',
+          type: j.type || 'Full-time',
+          skills: j.tags || j.skills || [],
+          description: j.description || '',
+          requirements: j.requirements || [],
+          salary: j.salary || 'Competitive',
+          deadline: j.deadline || 'TBD',
+          status: j.status || 'pending_approval'
+        };
+        setJobs(prev => [mapped, ...prev]);
+        return mapped;
+      }
+    } catch (err) {
+      console.error('Error posting job to backend:', err);
+    }
+
     const newJob = {
       id: `job_${Math.random().toString(36).substr(2, 9)}`,
       ...jobData,
@@ -227,7 +276,7 @@ export const JobsProvider = ({ children }) => {
   };
 
   return (
-    <JobsContext.Provider value={{ jobs, jobsLoading, jobsError, addJob, approveJob, rejectJob, getJobById, calculateMatchScore, fetchJobs }}>
+    <JobsContext.Provider value={{ jobs, addJob, approveJob, rejectJob, getJobById, calculateMatchScore, fetchJobs }}>
       {children}
     </JobsContext.Provider>
   );

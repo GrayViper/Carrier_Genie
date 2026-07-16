@@ -20,7 +20,7 @@ import { getNextSteps, getSavedJobs } from '../utils/studentJourney';
 import { hasStoredResume } from '../utils/resumeStorage';
 
 export default function StudentDashboard() {
-	const { user, updateUserProfile } = useAuth();
+	const { user, updateUserProfile, saveProfile } = useAuth();
 	const { jobs, calculateMatchScore } = useJobs();
 	const { applications, appsLoading } = useApplications();
 	const navigate = useNavigate();
@@ -80,19 +80,19 @@ export default function StudentDashboard() {
 		e.preventDefault();
 		const trimmed = newMajor.trim();
 		if (!trimmed) return;
-		updateUserProfile({ major: trimmed });
+		saveProfile(user.id, { major: trimmed });
 		setNewMajor('');
 	};
 
 	const handleRemoveMajor = () => {
-		updateUserProfile({ major: '' });
+		saveProfile(user.id, { major: '' });
 	};
 
 	const handleAddGradYear = (e) => {
 		e.preventDefault();
 		const year = parseInt(newGradYear, 10);
 		if (!year || Number.isNaN(year)) return;
-		updateUserProfile({ graduationYear: year });
+		saveProfile(user.id, { graduationYear: year });
 		setNewGradYear('');
 	};
 
@@ -100,33 +100,33 @@ export default function StudentDashboard() {
 		e.preventDefault();
 		const trimmed = newEmail.trim();
 		if (!trimmed) return;
-		updateUserProfile({ email: trimmed });
+		saveProfile(user.id, { email: trimmed });
 		setNewEmail('');
 	};
 
 	const handleRemoveEmail = () => {
-		updateUserProfile({ email: '' });
+		saveProfile(user.id, { email: '' });
 	};
 
 	const handleAddCollege = (e) => {
 		e.preventDefault();
 		const trimmed = newCollege.trim();
 		if (!trimmed) return;
-		updateUserProfile({ college: trimmed });
+		saveProfile(user.id, { college: trimmed });
 		setNewCollege('');
 	};
 
 	const handleRemoveCollege = () => {
-		updateUserProfile({ college: '' });
+		saveProfile(user.id, { college: '' });
 	};
 
 	const handleRemoveGradYear = () => {
-		updateUserProfile({ graduationYear: null });
+		saveProfile(user.id, { graduationYear: null });
 	};
 
 	const handleSaveProfile = (e) => {
 		e.preventDefault();
-		updateUserProfile({
+		saveProfile(user.id, {
 			major: editedMajor,
 			graduationYear: parseInt(editedGradYear, 10),
 			email: editedEmail,
@@ -142,14 +142,14 @@ export default function StudentDashboard() {
 		const currentSkills = Array.isArray(user.skills) ? user.skills : [];
 		const exists = currentSkills.some((s) => s.toLowerCase() === trimmed.toLowerCase());
 		if (!exists) {
-			updateUserProfile({ skills: [...currentSkills, trimmed] });
+			saveProfile(user.id, { skills: [...currentSkills, trimmed] });
 			setNewSkill('');
 		}
 	};
 
 	const handleRemoveSkill = (skillToRemove) => {
 		const currentSkills = Array.isArray(user.skills) ? user.skills : [];
-		updateUserProfile({ skills: currentSkills.filter((s) => s !== skillToRemove) });
+		saveProfile(user.id, { skills: currentSkills.filter((s) => s !== skillToRemove) });
 	};
 
 	return (

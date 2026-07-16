@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useClerk as useClerkAuth } from '@clerk/react';
 import { AuthContext } from './AuthContextValue';
 import { clearClerkSessionStorage, normalizeClerkUser } from '../utils/clerk';
@@ -52,7 +52,11 @@ const MOCK_USERS = {
 };
 
 export const AuthProvider = ({ children }) => {
-  const { signOut, isLoaded: clerkLoaded, isSignedIn: clerkSignedIn, getToken, user: clerkUser } = useClerkAuth();
+  const clerkAuth = useClerkAuth();
+  const clerkAuthRef = useRef(clerkAuth);
+  clerkAuthRef.current = clerkAuth;
+
+  const { signOut, isLoaded: clerkLoaded, isSignedIn: clerkSignedIn, user: clerkUser } = clerkAuth;
 
   // Default to no user (require explicit signin). Do not auto-restore from saved localStorage.
   const [user, setUser] = useState(null);
@@ -72,7 +76,23 @@ export const AuthProvider = ({ children }) => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (!parsed?.demo) setUser(normalizeResumeProfile(parsed));
+        if (!parsed) return;
+
+        if (!parsed.demo) {
+          // Regular (non-demo) users: always restore
+          setUser(normalizeResumeProfile(parsed));
+        } else {
+          // Demo users: ONLY restore if cg_role exactly matches the saved user role.
+          // If cg_role is missing (stale pre-fix session), refuse to restore — require fresh sign-in.
+          const storedRole = localStorage.getItem('cg_role');
+          if (storedRole && storedRole === parsed.role) {
+            setUser(normalizeResumeProfile(parsed));
+          } else {
+            // Stale or mismatched demo session — clear it to prevent cross-role contamination
+            localStorage.removeItem('cg_user');
+            localStorage.removeItem('cg_token');
+          }
+        }
       } catch {
         // ignore parse errors
       }
@@ -123,8 +143,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const getAuthToken = async () => {
-    if (clerkLoaded && clerkSignedIn && typeof getToken === 'function') {
+  const getAuthToken = useCallback(async () => {
+    const { isLoaded, isSignedIn, getToken } = clerkAuthRef.current;
+    if (isLoaded && isSignedIn && typeof getToken === 'function') {
       try {
         const token = await getToken();
         if (token) return token;
@@ -133,7 +154,7 @@ export const AuthProvider = ({ children }) => {
       }
     }
     return localStorage.getItem('cg_token');
-  };
+  }, []);
 
   const logout = async () => {
     setUser(null);
@@ -141,6 +162,7 @@ export const AuthProvider = ({ children }) => {
     // Explicitly clear all user-related localStorage on logout
     localStorage.removeItem('cg_user');
     localStorage.removeItem('cg_token');
+    localStorage.removeItem('cg_role');
     Object.keys(localStorage)
       .filter(k => k.startsWith('cg_applications'))
       .forEach(k => localStorage.removeItem(k));
@@ -168,40 +190,70 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const demoSignIn = (role = 'student') => {
-    // sign the user in as a demo account locally (marked as demo)
-    const demo = MOCK_USERS[role] ? { ...MOCK_USERS[role], demo: true } : { id: `usr_${role}`, name: `Demo ${role}`, email: `${role}@demo.careergenie`, role, demo: true };
+  const demoSignIn = async (role = 'student') => {
+    const demo = MOCK_USERS[role]
+      ? { ...MOCK_USERS[role], demo: true }
+      : { id: `usr_${role}`, name: `Demo ${role}`, email: `${role}@demo.careergenie`, role, demo: true };
     setUser(demo);
-    // do not persist demo sessions for auto-restore on app load (restore logic ignores demo flag)
+    // Store the active role so session restore can match token to the correct user
+    localStorage.setItem('cg_role', role);
+    // Try to obtain a real JWT from the server
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role })
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        localStorage.setItem('cg_token', data.token);
+        // Only use server user data if the role matches what we requested
+        if (data.user && data.user.role === role) {
+          setUser({ ...data.user, demo: true });
+        }
+        return;
+      }
+    } catch {
+      // server unreachable — fall back to base64 dev token
+    }
+    // Dev fallback: encode the user object as base64 so the backend's dev-auth recognises it
+    const devToken = btoa(JSON.stringify({ sub: demo.id, role: demo.role, email: demo.email, name: demo.name }));
+    localStorage.setItem('cg_token', devToken);
   };
 
-  const updateUserProfile = (updatedFields) => {
+  const updateUserProfile = useCallback((updatedFields) => {
     setUser(prev => {
       if (!prev) return null;
       const nextUser = normalizeResumeProfile({ ...prev, ...updatedFields });
       localStorage.setItem('cg_user', JSON.stringify(nextUser));
       return nextUser;
     });
-  };
+  }, []);
 
-  const fetchProfile = async (userId) => {
+  const fetchProfile = useCallback(async (userId) => {
     const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5178';
     try {
       const token = await getAuthToken();
       const res = await fetch(`${API_BASE}/api/users/${userId}`, { headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) } });
       const data = await res.json();
-      if (res.ok && data.user && data.user.id && data.user.role) {
-        // Merge with existing user to avoid wiping session fields
-        updateUserProfile(data.user);
+      if (res.ok && data.user && data.user.id) {
+        // Only merge if server user matches the current user's id AND role.
+        // Prevents cross-session contamination (e.g., recruiter token overwriting student).
+        setUser(prev => {
+          if (!prev || prev.id !== data.user.id || prev.role !== data.user.role) return prev;
+          const merged = normalizeResumeProfile({ ...prev, ...data.user });
+          localStorage.setItem('cg_user', JSON.stringify(merged));
+          return merged;
+        });
         return data.user;
       }
       return null;
     } catch {
       return null;
     }
-  };
+  }, [getAuthToken]);
 
-  const saveProfile = async (userId, updates) => {
+  const saveProfile = useCallback(async (userId, updates) => {
     const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5178';
     try {
       const token = await getAuthToken();
@@ -212,16 +264,18 @@ export const AuthProvider = ({ children }) => {
       });
       const data = await res.json();
       if (res.ok && data.user) {
-        setUser(data.user);
+        // Merge only the update fields — never replace the full user object with server data
+        // to avoid cross-session contamination (e.g., recruiter token overwriting student profile).
+        updateUserProfile(updates);
         return data.user;
       }
       return null;
     } catch {
       // fallback to local update
       updateUserProfile(updates);
-      return { ...user, ...updates };
+      return null;
     }
-  };
+  }, [getAuthToken, updateUserProfile]);
 
   const isAuthenticated = !!user;
 

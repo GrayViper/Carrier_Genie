@@ -55,14 +55,16 @@ export const ApplicationsProvider = ({ children }) => {
       return;
     }
 
-    const fetchApps = async () => {
+    const fetchApplications = async () => {
       setAppsLoading(true);
       try {
         const token = await getAuthToken();
         const res = await fetch(`${API_BASE}/api/applications`, { headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) } });
         const data = await res.json();
         if (res.ok && Array.isArray(data.applications)) {
-          const filtered = data.applications.filter(app => app.studentId === userId);
+          const filtered = user?.role === 'student'
+            ? data.applications.filter(app => app.studentId === userId)
+            : data.applications;
           setApplications(filtered);
           localStorage.setItem(getStorageKey(userId), JSON.stringify(filtered));
           localStorage.removeItem('cg_applications');
@@ -80,7 +82,9 @@ export const ApplicationsProvider = ({ children }) => {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed)) {
             // Extra safety: only keep applications that belong to this user
-            const filtered = parsed.filter(app => app.studentId === userId);
+            const filtered = user?.role === 'student'
+              ? parsed.filter(app => app.studentId === userId)
+              : parsed;
             setApplications(filtered);
             setAppsLoading(false);
             return;
@@ -95,7 +99,9 @@ export const ApplicationsProvider = ({ children }) => {
         try {
           const parsed = JSON.parse(legacy);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            const filtered = parsed.filter(app => app.studentId === userId);
+            const filtered = user?.role === 'student'
+              ? parsed.filter(app => app.studentId === userId)
+              : parsed;
             localStorage.setItem(storageKey, JSON.stringify(filtered));
             localStorage.removeItem('cg_applications');
             setApplications(filtered);
@@ -112,7 +118,8 @@ export const ApplicationsProvider = ({ children }) => {
       setAppsLoading(false);
     };
 
-    fetchApps();
+    fetchApplications();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [API_BASE, getAuthToken, userId]);
 
   useEffect(() => {
@@ -227,8 +234,29 @@ export const ApplicationsProvider = ({ children }) => {
     }
   };
 
+  // Expose fetchApplications so components can manually refresh (e.g. recruiter dashboard)
+  const fetchApplications = async () => {
+    if (!userId) return;
+    setAppsLoading(true);
+    try {
+      const token = await getAuthToken();
+      const res = await fetch(`${API_BASE}/api/applications`, { headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) } });
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.applications)) {
+        const apps = user?.role === 'student'
+          ? data.applications.filter(app => app.studentId === userId)
+          : data.applications;
+        setApplications(apps);
+      }
+    } catch {
+      // keep current state on error
+    } finally {
+      setAppsLoading(false);
+    }
+  };
+
   return (
-    <ApplicationsContext.Provider value={{ applications, appsLoading, applyToJob, updateApplicationStatus }}>
+    <ApplicationsContext.Provider value={{ applications, appsLoading, applyToJob, updateApplicationStatus, fetchApplications }}>
       {children}
     </ApplicationsContext.Provider>
   );

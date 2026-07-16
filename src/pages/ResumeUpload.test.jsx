@@ -3,7 +3,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
 
 vi.mock('../context/useAuth', () => ({
-  useAuth: () => ({ user: { id: 'usr_student', name: 'Olivia Chen', role: 'student' }, updateUserProfile: () => {} })
+  useAuth: () => ({ 
+    user: { id: 'usr_student', name: 'Olivia Chen', role: 'student' }, 
+    updateUserProfile: () => {},
+    saveProfile: () => Promise.resolve({ id: 'usr_student' }),
+    getAuthToken: () => Promise.resolve('mock-token')
+  })
 }));
 
 // Simple mock for fetch used in component
@@ -19,6 +24,7 @@ class MockFileReader {
 }
 global.FileReader = MockFileReader;
 
+import { MemoryRouter } from 'react-router-dom';
 import ResumeUpload from './ResumeUpload';
 
 describe('ResumeUpload', () => {
@@ -29,7 +35,11 @@ describe('ResumeUpload', () => {
     global.setInterval = (cb) => { for (let i = 0; i < 6; i++) cb(); return 1; };
     global.clearInterval = () => {};
 
-    const { container } = render(<ResumeUpload />);
+    const { container } = render(
+      <MemoryRouter>
+        <ResumeUpload />
+      </MemoryRouter>
+    );
 
     const fileInput = container.querySelector('input[type="file"]');
     expect(fileInput).toBeInTheDocument();

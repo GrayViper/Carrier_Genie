@@ -1,78 +1,77 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-export const SERVER_STATUS = {
-  UNKNOWN: 'unknown',
-  UP: 'up',
-  WAKING: 'waking',   // slow response — Render free tier spinning up
-  DOWN: 'down',
-};
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5178';
 
-const HEALTH_URL = `${import.meta.env.VITE_API_BASE || 'http://localhost:5178'}/health`;
-const FAST_TIMEOUT = 4000;   // if no response in 4s → waking
-const DOWN_TIMEOUT = 15000;  // if no response in 15s → down
-const POLL_INTERVAL = 30000; // re-check every 30s
+// How often to poll (ms). When server is down, poll faster to detect recovery.
+const POLL_INTERVAL_UP   = 30_000;
+const POLL_INTERVAL_DOWN = 10_000;
+const TIMEOUT_MS         = 6_000;
 
-async function pingServer() {
-  const controller = new AbortController();
-  const downTimer = setTimeout(() => controller.abort(), DOWN_TIMEOUT);
-
-  const wakingTimer = setTimeout(() => {
-    // Don't abort — let the request continue, just mark as waking
-  }, FAST_TIMEOUT);
-
-  const start = Date.now();
-  try {
-    const res = await fetch(HEALTH_URL, {
-      signal: controller.signal,
-      cache: 'no-store',
-    });
-    clearTimeout(downTimer);
-    clearTimeout(wakingTimer);
-    const elapsed = Date.now() - start;
-    if (res.ok) {
-      return elapsed > FAST_TIMEOUT ? SERVER_STATUS.WAKING : SERVER_STATUS.UP;
-    }
-    return SERVER_STATUS.DOWN;
-  } catch {
-    clearTimeout(downTimer);
-    clearTimeout(wakingTimer);
-    return SERVER_STATUS.DOWN;
-  }
-}
-
-export function useServerStatus() {
-  const [status, setStatus] = useState(SERVER_STATUS.UNKNOWN);
+/**
+ * Tracks whether the backend is reachable.
+ *
+ * Returns:
+ *   serverStatus — 'checking' | 'up' | 'down' | 'waking'
+ *   isDown       — boolean shorthand
+ *   isWaking     — true when first request after a down period is in-flight
+ *   lastChecked  — Date | null
+ *   recheck      — call to trigger an immediate check
+ */
+export default function useServerStatus() {
+  const [status, setStatus]           = useState('checking'); // checking | up | down | waking
   const [lastChecked, setLastChecked] = useState(null);
-  const wakingTimerRef = useRef(null);
+  const downSince                     = useRef(null);
+  const intervalRef                   = useRef(null);
 
-  const check = useCallback(async () => {
-    // Immediately mark as waking if unknown or previously down
-    // so the banner shows while we wait
-    setStatus(prev =>
-      prev === SERVER_STATUS.UP ? SERVER_STATUS.UP : SERVER_STATUS.WAKING
-    );
+  const check = useCallback(async (isRecoveryAttempt = false) => {
+    if (isRecoveryAttempt && status === 'down') {
+      setStatus('waking');
+    }
 
-    // Set a fast waking indicator after 4s if no response yet
-    wakingTimerRef.current = setTimeout(() => {
-      setStatus(prev =>
-        prev !== SERVER_STATUS.UP ? SERVER_STATUS.WAKING : prev
-      );
-    }, FAST_TIMEOUT);
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-    const result = await pingServer();
-    clearTimeout(wakingTimerRef.current);
-    setStatus(result);
+      const res = await fetch(`${API_BASE}/health`, {
+        signal: controller.signal,
+        cache: 'no-store',
+      });
+      clearTimeout(timer);
+
+      if (res.ok) {
+        downSince.current = null;
+        setStatus('up');
+      } else {
+        if (!downSince.current) downSince.current = new Date();
+        setStatus('down');
+      }
+    } catch {
+      if (!downSince.current) downSince.current = new Date();
+      setStatus('down');
+    }
+
     setLastChecked(new Date());
+  }, [status]);
+
+  // Start polling — faster interval when server is down
+  useEffect(() => {
+    check();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    check();
-    const interval = setInterval(check, POLL_INTERVAL);
-    return () => {
-      clearInterval(interval);
-      clearTimeout(wakingTimerRef.current);
-    };
-  }, [check]);
+    const interval = status === 'down' ? POLL_INTERVAL_DOWN : POLL_INTERVAL_UP;
+    clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => check(), interval);
+    return () => clearInterval(intervalRef.current);
+  }, [status, check]);
 
-  return { status, lastChecked, retry: check };
+  return {
+    serverStatus: status,
+    isDown:       status === 'down',
+    isWaking:     status === 'waking',
+    isChecking:   status === 'checking',
+    lastChecked,
+    recheck:      () => check(true),
+  };
 }

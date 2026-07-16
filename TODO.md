@@ -5,15 +5,15 @@
 - [ ] Add skeleton loaders to JobListingPage, StudentDashboard, ApplicationTracker, AdminPanel (task 5-8 of resilient frontend)
 - [ ] Improve ProtectedRoute loading screen from plain text to skeleton (task 9 of resilient frontend)
 - [ ] Authentication implementation and JWT login/signup flow
-- [ ] Resume upload and AI analysis workflow
 - [ ] Job matching algorithm and job recommendations
-- [ ] Job posting creation, editing, and listing
-- [ ] Dashboards for student, recruiter, and admin
 - [ ] Application tracking workflow and status updates
 - [ ] Notifications system for students and recruiters
 - [ ] Admin panel access control and metrics view
 
 ## Completed (all)
+- [x] Resume upload and AI analysis workflow (persisted database integration)
+- [x] Job posting creation and recruiter dashboard analytics integration
+- [x] Recruiter pipeline candidate detail drawer with secure resume download
 - [x] Replace OpenAI with Google Gemini API for resume analysis (free tier)
 - [x] Investigate/implement MCP server for background processing
 - [x] Add Clerk MCP server entrypoint for local tooling

@@ -15,11 +15,16 @@ vi.mock('../context/useApplications', () => ({
   useApplications: () => ({ applications: [] })
 }));
 
+import { MemoryRouter } from 'react-router-dom';
 import RecruiterDashboard from './RecruiterDashboard';
 
 describe('RecruiterDashboard', () => {
   it('renders basic heading for recruiter', () => {
-    render(<RecruiterDashboard />);
-    expect(screen.getByText(/Recruiter Dashboard/i)).toBeInTheDocument();
+    render(
+      <MemoryRouter>
+        <RecruiterDashboard />
+      </MemoryRouter>
+    );
+    expect(screen.getByText(/Recruiter workspace/i)).toBeInTheDocument();
   });
 });

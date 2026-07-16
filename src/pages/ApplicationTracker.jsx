@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../context/useAuth';
 import { useApplications } from '../context/useApplications';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Calendar, CheckSquare, Bell, Mail, CheckCheck, Download } from 'lucide-react';
+import { Check, Calendar, CheckSquare, Bell, Mail, CheckCheck, Download, RefreshCw } from 'lucide-react';
 import { getStoredResume, hasStoredResume } from '../utils/resumeStorage';
 
 export default function ApplicationTracker() {
   const { user, getAuthToken } = useAuth();
-  const { applications, updateApplicationStatus } = useApplications();
+  const { applications, updateApplicationStatus, fetchApplications } = useApplications();
   const navigate = useNavigate();
   const [selectedAppId, setSelectedAppId] = useState(null);
   const [notifications, setNotifications] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5178';
 
   const handleUpdateStatus = (appId, newStatus) => {
@@ -43,9 +44,26 @@ export default function ApplicationTracker() {
     const interval = window.setInterval(() => {
       void fetchNotifications();
     }, 15000);
-
     return () => window.clearInterval(interval);
   }, [API_BASE, getAuthToken, user?.id]);
+
+  // Poll server for updated application statuses every 30 seconds (so student sees Offer/Interview changes)
+  const refreshApplications = useCallback(async () => {
+    if (!fetchApplications || !user?.id) return;
+    setRefreshing(true);
+    await fetchApplications();
+    setRefreshing(false);
+  }, [fetchApplications, user?.id]);
+
+  useEffect(() => {
+    if (user?.role !== 'student') return;
+    // Initial fetch
+    void refreshApplications();
+    // Poll every 30 seconds
+    const interval = window.setInterval(() => void refreshApplications(), 30000);
+    return () => window.clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, user?.role]);
 
   const markNotificationRead = async (notificationId) => {
     try {
@@ -121,16 +139,29 @@ export default function ApplicationTracker() {
     if (status === 'Applied') return 0;
     if (status === 'Review') return 1;
     if (status === 'Interview') return 2;
-    if (status === 'Offer' || status === 'Rejected') return 3;
+    if (status === 'Offer' || status === 'Rejected' || status === 'Offer Accepted' || status === 'Offer Declined') return 3;
     return 0;
   };
 
   return (
     <div className="py-10 px-4 max-w-7xl mx-auto sm:px-6 lg:px-8 text-left space-y-8">
       {/* Title */}
-      <div className="border-b border-white/5 pb-6">
-        <h1 className="text-3xl font-display font-black text-white">Application Tracker</h1>
-        <p className="text-sm text-gray-400">Track and monitor the status of your applications in real-time.</p>
+      <div className="border-b border-white/5 pb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-display font-black text-white">Application Tracker</h1>
+          <p className="text-sm text-gray-400">Track and monitor the status of your applications in real-time.</p>
+        </div>
+        {user.role === 'student' && (
+          <button
+            type="button"
+            onClick={() => refreshApplications()}
+            disabled={refreshing}
+            className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-4 py-2 text-sm font-semibold text-gray-300 transition disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
+        )}
       </div>
 
       {notifications.length > 0 && (
@@ -252,6 +283,35 @@ export default function ApplicationTracker() {
                   </div>
                 </div>
 
+              {/* Status banner for Offer / Rejected */}
+              {activeApp.status === 'Offer' && user.role === 'student' && (
+                <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4 flex items-center gap-3">
+                  <span className="text-3xl">🎉</span>
+                  <div>
+                    <div className="font-black text-emerald-300 text-base">Congratulations! You've received an offer!</div>
+                    <div className="text-xs text-emerald-200/80 mt-0.5">The recruiter at {activeApp.company} has extended you an offer for the {activeApp.jobTitle} role. Check your email for next steps.</div>
+                  </div>
+                </div>
+              )}
+              {activeApp.status === 'Interview' && user.role === 'student' && (
+                <div className="rounded-2xl border border-purple-400/30 bg-purple-500/10 p-4 flex items-center gap-3">
+                  <span className="text-2xl">📅</span>
+                  <div>
+                    <div className="font-black text-purple-300 text-base">Interview Scheduled</div>
+                    <div className="text-xs text-purple-200/80 mt-0.5">{activeApp.company} has moved you to the interview stage for {activeApp.jobTitle}. Expect to hear from them soon.</div>
+                  </div>
+                </div>
+              )}
+              {activeApp.status === 'Rejected' && user.role === 'student' && (
+                <div className="rounded-2xl border border-rose-400/30 bg-rose-500/10 p-4 flex items-center gap-3">
+                  <span className="text-2xl">📋</span>
+                  <div>
+                    <div className="font-black text-rose-300 text-base">Application Reviewed</div>
+                    <div className="text-xs text-rose-200/80 mt-0.5">Thank you for applying to {activeApp.company}. They've completed their review — keep applying to other roles!</div>
+                  </div>
+                </div>
+              )}
+
                 {/* Progress Stepper Visualizer */}
                 <div className="space-y-4">
                   <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Application Progress</span>
@@ -276,6 +336,8 @@ export default function ApplicationTracker() {
                       let displayStatus = stage;
                       if (stage === 'Outcome') {
                         if (activeApp.status === 'Offer') displayStatus = 'Offer Extended';
+                        else if (activeApp.status === 'Offer Accepted') displayStatus = '✅ Accepted';
+                        else if (activeApp.status === 'Offer Declined') displayStatus = 'Offer Declined';
                         else if (activeApp.status === 'Rejected') displayStatus = 'Outcome (Rejected)';
                         else displayStatus = 'Final Outcome';
                       }
@@ -341,6 +403,84 @@ export default function ApplicationTracker() {
                     </div>
                   </div>
                 )}
+
+                {/* Student-specific action panel */}
+                {user.role === 'student' && (
+                  <div className="space-y-4 pt-4 border-t border-white/5 text-xs">
+                    <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Your Actions</span>
+
+                    {/* Interview stage — show info */}
+                    {activeApp.status === 'Interview' && (
+                      <div className="rounded-xl border border-purple-400/20 bg-purple-500/5 p-4 space-y-2">
+                        <div className="font-semibold text-purple-300 flex items-center gap-2">
+                          <Calendar className="w-4 h-4" /> Interview Stage
+                        </div>
+                        <p className="text-gray-400 leading-relaxed">
+                          {activeApp.company} has invited you for an interview for the <strong className="text-white">{activeApp.jobTitle}</strong> role.
+                          The recruiter will contact you with scheduling details via email shortly.
+                        </p>
+                        <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/10 border border-purple-400/20 px-3 py-1 text-[10px] font-semibold text-purple-300 uppercase tracking-wider">
+                          Awaiting recruiter confirmation
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Offer stage — Accept or Decline */}
+                    {activeApp.status === 'Offer' && (
+                      <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/5 p-4 space-y-3">
+                        <div className="font-semibold text-emerald-300 flex items-center gap-2">
+                          🎉 Offer Extended by {activeApp.company}
+                        </div>
+                        <p className="text-gray-400">
+                          You have received a job offer for <strong className="text-white">{activeApp.jobTitle}</strong>.
+                          Please respond below to inform the recruiter of your decision.
+                        </p>
+                        <div className="flex gap-2 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateStatus(activeApp.id, 'Offer Accepted')}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-lg text-[11px] transition"
+                          >
+                            ✅ Accept Offer
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateStatus(activeApp.id, 'Offer Declined')}
+                            className="bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 font-semibold px-4 py-2 rounded-lg border border-rose-500/20 text-[11px] transition"
+                          >
+                            ❌ Decline Offer
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Accepted */}
+                    {activeApp.status === 'Offer Accepted' && (
+                      <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/5 p-4">
+                        <div className="font-semibold text-emerald-300">✅ Offer Accepted</div>
+                        <p className="text-gray-400 mt-1">You have accepted the offer from {activeApp.company}. Congratulations on your new role!</p>
+                      </div>
+                    )}
+
+                    {/* Declined */}
+                    {activeApp.status === 'Offer Declined' && (
+                      <div className="rounded-xl border border-gray-400/10 bg-white/5 p-4">
+                        <div className="font-semibold text-gray-300">Offer Declined</div>
+                        <p className="text-gray-500 mt-1">You declined this offer. Keep exploring opportunities — the right fit is out there!</p>
+                      </div>
+                    )}
+
+                    {/* Applied or Review — just inform */}
+                    {(activeApp.status === 'Applied' || activeApp.status === 'Review') && (
+                      <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
+                        <p className="text-gray-500">
+                          Your application is under review by {activeApp.company}. We'll notify you of any updates — check back here or refresh the page.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
 
                 {/* Tracking Logs History */}
                 <div className="space-y-4 pt-4 border-t border-white/5 text-xs">

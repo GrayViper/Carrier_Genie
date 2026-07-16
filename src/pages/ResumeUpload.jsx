@@ -10,7 +10,7 @@ import { saveStoredResume } from '../utils/resumeStorage';
 import { analyzeResume } from '../utils/geminiAnalysis';
 
 export default function ResumeUpload() {
-  const { user, updateUserProfile } = useAuth();
+  const { user, updateUserProfile, saveProfile, getAuthToken } = useAuth();
   const navigate = useNavigate();
   
   const [file, setFile] = useState(null);
@@ -113,6 +113,15 @@ export default function ResumeUpload() {
       suggestions: analysisResult.suggestions
     };
 
+    // Merge AI-detected skills with the student's existing skills (de-duplicated, normalized)
+    const existingSkills = Array.isArray(user.skills) ? user.skills : [];
+    const aiSkills = Array.isArray(analysisResult.skills) ? analysisResult.skills : [];
+    const mergedSkills = Array.from(
+      new Set(
+        [...existingSkills, ...aiSkills].map(s => s.trim()).filter(Boolean).map(s => s.charAt(0).toUpperCase() + s.slice(1))
+      )
+    );
+
     const storedResume = saveStoredResume(user?.id, {
       fileName: file.name,
       contentBase64: base64 || fileBase64Ref.current || '',
@@ -125,7 +134,7 @@ export default function ResumeUpload() {
       resumeUploaded: Boolean(storedResume),
       resumeName: file.name,
       resumeScore: analysisResult.score,
-      skills: analysisResult.skills?.length ? analysisResult.skills : (user.skills || []),
+      skills: mergedSkills.length ? mergedSkills : existingSkills,
       feedback
     };
 
@@ -142,7 +151,37 @@ export default function ResumeUpload() {
     // Set report and score BEFORE clearing parsing state to avoid blank flash
     setReport(feedback);
     setReportScore(analysisResult.score);
+    
+    // Update local state immediately
     updateUserProfile(newProfile);
+    
+    // Sync with the backend database
+    saveProfile(user.id, newProfile)
+      .then(() => {
+        console.log('Profile saved to database successfully');
+      })
+      .catch(err => console.error('Failed to sync profile with database:', err));
+
+    // Upload base64 resume content to the server
+    getAuthToken().then(token => {
+      fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:5178'}/api/resume`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          studentId: user.id,
+          fileName: file.name,
+          contentBase64: base64 || fileBase64Ref.current || ''
+        })
+      })
+      .then(res => {
+        if (!res.ok) console.error('Resume upload returned status:', res.status);
+      })
+      .catch(err => console.error('Error uploading resume to backend:', err));
+    });
+
     setParsing(false);
   };
 
