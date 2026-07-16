@@ -57,6 +57,23 @@ export default function ResumeUpload() {
     e.preventDefault();
     if (!file) return;
 
+    // If FileReader hasn't finished yet, wait up to 2s for it
+    if (!fileBase64Ref.current) {
+      const waitForBase64 = (attempts = 0) => {
+        if (fileBase64Ref.current) {
+          startAnalysis();
+        } else if (attempts < 10) {
+          setTimeout(() => waitForBase64(attempts + 1), 200);
+        }
+      };
+      waitForBase64();
+      return;
+    }
+
+    startAnalysis();
+  };
+
+  const startAnalysis = () => {
     setParsing(true);
     setParsingStep(0);
 
@@ -107,9 +124,13 @@ export default function ResumeUpload() {
       }
 
       const { jobId } = await uploadRes.json();
+      if (!jobId) {
+        finishParsing(fallbackFeedback, base64);
+        return;
+      }
 
-      // Step 2 — poll for the analysis result (max 30s)
-      const maxAttempts = 30;
+      // Step 2 — poll for the analysis result (max 20s)
+      const maxAttempts = 20;
       for (let i = 0; i < maxAttempts; i++) {
         await new Promise(r => setTimeout(r, 1000));
         try {
