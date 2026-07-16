@@ -7,9 +7,10 @@ import {
 } from 'lucide-react';
 import { calculateAtsScore, generateAtsSuggestions } from '../utils/resume';
 import { saveStoredResume } from '../utils/resumeStorage';
+import { analyzeResume } from '../utils/geminiAnalysis';
 
 export default function ResumeUpload() {
-  const { user, updateUserProfile, getAuthToken } = useAuth();
+  const { user, updateUserProfile } = useAuth();
   const navigate = useNavigate();
   
   const [file, setFile] = useState(null);
@@ -77,7 +78,7 @@ export default function ResumeUpload() {
     setParsing(true);
     setParsingStep(0);
 
-    // Step through visual parsing stages while backend does real analysis in parallel
+    // Step through visual parsing stages
     let step = 0;
     const advance = () => {
       step += 1;
@@ -85,84 +86,21 @@ export default function ResumeUpload() {
         setParsingStep(step);
         setTimeout(advance, 800);
       }
-      // don't call finishParsing here — we wait for the API response
     };
     setTimeout(advance, 800);
 
-    // Fire the actual backend analysis immediately in parallel
-    runBackendAnalysis();
-  };
-
-  const runBackendAnalysis = async () => {
-    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5178';
-    const base64 = fileBase64Ref.current; // use ref — state may not have committed yet
-
-    // Fallback feedback used when backend is unreachable
-    const fallbackFeedback = {
-      score: 76,
-      atsScore: 72,
-      skills: ['Git', 'JavaScript'],
-      strengths: ['Clear project descriptions with strong frontend focus.', 'Demonstrates collaboration and modern tooling awareness.'],
-      weaknesses: ['Limited cloud deployment detail.', 'No explicit backend testing framework shown.'],
-      suggestions: ['Add a Docker or cloud deployment example.', 'Mention testing tools or automation experience.'],
-      analysisType: 'fallback'
-    };
-
-    try {
-      const token = await getAuthToken();
-
-      // Step 1 — submit the resume, get a jobId back
-      const uploadRes = await fetch(`${API_BASE}/api/resume`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ studentId: user?.id, fileName: file.name, contentBase64: base64 })
-      });
-
-      if (!uploadRes.ok) {
-        finishParsing(fallbackFeedback, base64);
-        return;
-      }
-
-      const { jobId } = await uploadRes.json();
-      if (!jobId) {
-        finishParsing(fallbackFeedback, base64);
-        return;
-      }
-
-      // Step 2 — poll for the analysis result (max 20s)
-      const maxAttempts = 20;
-      for (let i = 0; i < maxAttempts; i++) {
-        await new Promise(r => setTimeout(r, 1000));
-        try {
-          const statusRes = await fetch(`${API_BASE}/api/resume/status/${jobId}`, {
-            headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
-          });
-          if (statusRes.ok) {
-            const { job } = await statusRes.json();
-            if (job?.status === 'done') {
-              finishParsing({
-                score: job.score || 76,
-                atsScore: job.atsScore || 72,
-                skills: job.analysis?.skills || [],
-                strengths: job.analysis?.strengths || fallbackFeedback.strengths,
-                weaknesses: job.analysis?.weaknesses || fallbackFeedback.weaknesses,
-                suggestions: job.analysis?.suggestions || fallbackFeedback.suggestions,
-                analysisType: 'gemini'
-              }, base64);
-              return;
-            }
-            if (job?.status === 'error') break;
-          }
-        } catch {
-          // keep polling
-        }
-      }
-
-      // Timed out or errored — show fallback
-      finishParsing(fallbackFeedback, base64);
-    } catch {
-      finishParsing(fallbackFeedback, base64);
-    }
+    // Run Gemini analysis directly from the browser
+    const base64 = fileBase64Ref.current;
+    analyzeResume(base64, file.name)
+      .then(result => finishParsing(result, base64))
+      .catch(() => finishParsing({
+        score: 76, atsScore: 72,
+        skills: [],
+        strengths: ['Resume uploaded successfully.'],
+        weaknesses: ['Could not complete AI analysis.'],
+        suggestions: ['Try again or check your connection.'],
+        analysisType: 'fallback'
+      }, base64));
   };
 
   const finishParsing = (analysisResult, base64) => {
