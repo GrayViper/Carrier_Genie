@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/useAuth';
+import { useAuth } from './useAuth';
+import { calculateMatchScore } from './scoring';
 import { JobsContext } from './JobsContextValue';
 
 const INITIAL_JOBS = [
@@ -134,7 +135,7 @@ export const JobsProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : INITIAL_JOBS;
   });
   const [jobsLoading, setJobsLoading] = useState(true);
-  const [jobsError, setJobsError]     = useState(false); // true = server unreachable
+  const [jobsError, setJobsError] = useState(false); // true = server unreachable
 
   // Fetch jobs from mock API and replace local list if available
   const fetchJobs = async () => {
@@ -241,13 +242,13 @@ export const JobsProvider = ({ children }) => {
   };
 
   const approveJob = (jobId) => {
-    setJobs(prev => prev.map(job => 
+    setJobs(prev => prev.map(job =>
       job.id === jobId ? { ...job, status: 'active' } : job
     ));
   };
 
   const rejectJob = (jobId) => {
-    setJobs(prev => prev.map(job => 
+    setJobs(prev => prev.map(job =>
       job.id === jobId ? { ...job, status: 'rejected' } : job
     ));
   };
@@ -256,29 +257,9 @@ export const JobsProvider = ({ children }) => {
     return jobs.find(job => job.id === jobId);
   };
 
-  const calculateMatchScore = (jobSkills, userSkills = []) => {
-    if (!jobSkills || jobSkills.length === 0) return 0;
-    if (!userSkills || userSkills.length === 0) return 30; // base score if they have some general profile
-
-    const jobSkillsLower = jobSkills.map(s => s.toLowerCase());
-    const userSkillsLower = userSkills.map(s => s.toLowerCase());
-    
-    let matchCount = 0;
-    jobSkillsLower.forEach(js => {
-      if (userSkillsLower.some(us => us.includes(js) || js.includes(us))) {
-        matchCount++;
-      }
-    });
-
-    const percent = Math.round((matchCount / jobSkills.length) * 100);
-    // Return at least 40% if they have some general matching, max 100%
-    return Math.max(percent, 35);
-  };
-
   return (
     <JobsContext.Provider value={{ jobs, addJob, approveJob, rejectJob, getJobById, calculateMatchScore, fetchJobs }}>
       {children}
     </JobsContext.Provider>
   );
 };
-

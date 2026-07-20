@@ -15,7 +15,7 @@ services:
       - key: JWT_SECRET
         generator: random
       - key: FRONTEND_ORIGIN
-        value: https://<your-vercel-domain>.vercel.app
+        value: https://career-genie-example.vercel.app
       - key: GEMINI_MODEL
         value: gemini-1.5-flash
       - key: GEMINI_ENDPOINT

@@ -91,7 +91,7 @@ async function tryAnalyzeResume(contentBase64, fileName) {
 function getInitialData() {
   return {
     users: [
-      { id: 'usr_student', name: 'Olivia Chen', email: 'olivia@gmail.com', role: 'student', skills: ['React','JavaScript'], resumeUploaded: true, resumeName: 'Olivia_Chen_Resume_2026.pdf', resumeScore: 84, feedback: {}, atsScore: 84 },
+      { id: 'usr_student', name: 'Olivia Chen', email: 'olivia@gmail.com', role: 'student', skills: ['React', 'JavaScript'], resumeUploaded: true, resumeName: 'Olivia_Chen_Resume_2026.pdf', resumeScore: 84, feedback: {}, atsScore: 84 },
       { id: 'usr_recruiter', name: 'David Miller', email: 'david@stripe.com', role: 'recruiter', company: 'Stripe', companyLogo: 'S' },
       { id: 'usr_admin', name: 'Alex Mercer', email: 'admin@careergenie.com', role: 'admin' }
     ],
@@ -211,7 +211,7 @@ function getInitialData() {
         title: 'Frontend Engineer',
         company: 'Acme',
         location: 'Remote',
-        tags: ['React','JavaScript'],
+        tags: ['React', 'JavaScript'],
         description: 'Build great UIs.',
         status: 'active',
         logo: 'A',
@@ -494,7 +494,7 @@ async function writeData(data) {
 }
 
 function generateId(prefix = 'id') {
-  return `${prefix}_${Math.random().toString(36).slice(2,9)}`;
+  return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
 async function sendApprovalEmailNotification({ recipientEmail, jobTitle, company, message }) {
@@ -977,7 +977,8 @@ function setupRoutes(app) {
     } else if (req.user.sub === studentId) {
       allowed = true;
     } else if (req.user.role === 'recruiter') {
-      const recruiterJobs = data.jobs.filter(j => j.posterId === req.user.sub || j.company === req.user.company);
+      const recruiterUser = data.users.find(u => u.id === req.user.sub);
+      const recruiterJobs = data.jobs.filter(j => j.posterId === req.user.sub || (recruiterUser?.company && j.company?.toLowerCase() === recruiterUser.company.toLowerCase()));
       const recruiterJobIds = recruiterJobs.map(j => j.id);
       const hasApplied = data.applications.some(a => a.studentId === studentId && recruiterJobIds.includes(a.jobId));
       if (hasApplied) {

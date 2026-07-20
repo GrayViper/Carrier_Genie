@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { 
-  Upload, FileText, CheckCircle, Loader2, ArrowRight, Download, 
-  Sparkles, ListChecks, Check, ShieldAlert 
+import {
+  Upload, FileText, CheckCircle, Loader2, ArrowRight, Download,
+  Sparkles, ListChecks, Check, ShieldAlert
 } from 'lucide-react';
 import { calculateAtsScore, generateAtsSuggestions } from '../utils/resume';
 import { saveStoredResume } from '../utils/resumeStorage';
@@ -12,7 +12,7 @@ import { analyzeResume } from '../utils/geminiAnalysis';
 export default function ResumeUpload() {
   const { user, updateUserProfile, saveProfile, getAuthToken } = useAuth();
   const navigate = useNavigate();
-  
+
   const [file, setFile] = useState(null);
   const [fileBase64, setFileBase64] = useState(null);
   const fileBase64Ref = React.useRef(null); // ref so runBackendAnalysis always gets latest value
@@ -151,10 +151,10 @@ export default function ResumeUpload() {
     // Set report and score BEFORE clearing parsing state to avoid blank flash
     setReport(feedback);
     setReportScore(analysisResult.score);
-    
+
     // Update local state immediately
     updateUserProfile(newProfile);
-    
+
     // Sync with the backend database
     saveProfile(user.id, newProfile)
       .then(() => {
@@ -176,10 +176,10 @@ export default function ResumeUpload() {
           contentBase64: base64 || fileBase64Ref.current || ''
         })
       })
-      .then(res => {
-        if (!res.ok) console.error('Resume upload returned status:', res.status);
-      })
-      .catch(err => console.error('Error uploading resume to backend:', err));
+        .then(res => {
+          if (!res.ok) console.error('Resume upload returned status:', res.status);
+        })
+        .catch(err => console.error('Error uploading resume to backend:', err));
     });
 
     setParsing(false);
@@ -189,7 +189,7 @@ export default function ResumeUpload() {
     // Simulated report document download
     const element = document.createElement("a");
     const fileContent = `CAREERGENIE AI RESUME REPORT\n========================\nFile: ${user?.resumeName || 'Resume.pdf'}\nOverall Rating: ${reportScore}/100\n\nSTRENGTHS:\n- ${report?.strengths.join('\n- ')}\n\nWEAKNESSES:\n- ${report?.weaknesses.join('\n- ')}\n\nSUGGESTIONS:\n- ${report?.suggestions.join('\n- ')}`;
-    const fileData = new Blob([fileContent], {type: 'text/plain'});
+    const fileData = new Blob([fileContent], { type: 'text/plain' });
     element.href = URL.createObjectURL(fileData);
     element.download = "CareerGenie_AI_Feedback_Report.txt";
     document.body.appendChild(element);
@@ -206,16 +206,16 @@ export default function ResumeUpload() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
-        
+
         {/* Upload Panel */}
         <div className="lg:col-span-2 space-y-6">
           <div className="glass-panel-card p-6 rounded-2xl border border-white/5 space-y-4">
             <h3 className="font-display font-bold text-lg text-white">Upload Resume</h3>
-            
+
             <form onSubmit={handleUploadSubmit} className="space-y-4 text-xs">
               <div className="border-2 border-dashed border-white/10 rounded-xl p-8 flex flex-col items-center justify-center text-center transition relative bg-slate-900/10">
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   accept=".pdf"
                   onChange={handleFileChange}
                   className={`absolute inset-0 opacity-0 ${parsing ? 'cursor-not-allowed' : 'cursor-pointer'}`}
@@ -279,7 +279,7 @@ export default function ResumeUpload() {
         <div className="lg:col-span-3">
           {report ? (
             <div className="glass-panel-card p-6 rounded-2xl border border-white/5 space-y-6">
-              
+
               {/* Header metrics */}
               <div className="flex justify-between items-center border-b border-white/5 pb-4">
                 <div className="flex items-center gap-2">
@@ -291,7 +291,7 @@ export default function ResumeUpload() {
                     <p className="text-[10px] text-gray-500">Updated matches score instantly calculated.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <div className="text-right">
                     <span className="text-2xl font-black text-white block">{reportScore} / 100</span>

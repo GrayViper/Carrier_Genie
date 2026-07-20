@@ -15,6 +15,7 @@
 - [x] Job posting creation and recruiter dashboard analytics integration
 - [x] Recruiter pipeline candidate detail drawer with secure resume download
 - [x] Replace OpenAI with Google Gemini API for resume analysis (free tier)
+- [x] Fix: Recruiter cannot view applicant's resume
 - [x] Investigate/implement MCP server for background processing
 - [x] Add Clerk MCP server entrypoint for local tooling
 - [x] Tech: Frontend — React.js + Tailwind CSS
