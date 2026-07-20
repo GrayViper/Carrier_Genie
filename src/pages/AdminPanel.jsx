@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/useAuth';
 import { useJobs } from '../context/useJobs';
-import { Users, Briefcase, FileText, Check, X, Activity, CheckCircle2, Clock3, ShieldCheck, Sparkles, Download } from 'lucide-react';
+import { Users, Briefcase, FileText, Check, X, Activity, CheckCircle2, Clock3, ShieldCheck, Sparkles, Download, AlertTriangle } from 'lucide-react';
 
 export default function AdminPanel() {
   const { user, getAuthToken } = useAuth();
@@ -9,6 +9,8 @@ export default function AdminPanel() {
 
   const [mockUsers, setMockUsers] = useState([
     { id: 'usr_student', name: 'Olivia Chen', email: 'olivia@gmail.com', role: 'student', details: 'Resume Score: 84%' },
+    { id: 'usr_student_test_flow', name: 'Test Student Flow', email: 'test-flow@student.com', role: 'student', details: 'Resume Score: N/A' },
+    { id: 'usr_recruiter_test_flow', name: 'Test Recruiter', email: 'test-recruiter@company.com', role: 'recruiter', details: 'Company: TestCo' },
     { id: 'usr_recruiter', name: 'David Miller', email: 'david@stripe.com', role: 'recruiter', details: 'Company: Stripe' },
     { id: 'usr_admin', name: 'Alex Mercer', email: 'admin@careergenie.com', role: 'admin', details: 'System Overseer' },
     { id: 'usr_mock_stud_2', name: 'James Carter', email: 'james@gmail.com', role: 'student', details: 'Resume Score: 62%' },
@@ -70,14 +72,16 @@ export default function AdminPanel() {
 
   const pendingJobs = jobs.filter((job) => job.status === 'pending_approval');
 
-  const handleApproveJob = (jobId) => {
-    approveJob(jobId);
+  const handleApproveJob = async (jobId) => {
+    await approveJob(jobId);
+    await fetchJobs();
     setNotification('Job opportunity approved and activated successfully.');
     setTimeout(() => setNotification(''), 4000);
   };
 
-  const handleRejectJob = (jobId) => {
-    rejectJob(jobId);
+  const handleRejectJob = async (jobId) => {
+    await rejectJob(jobId);
+    await fetchJobs();
     setNotification('Job opportunity has been archived/rejected.');
     setTimeout(() => setNotification(''), 4000);
   };
@@ -128,17 +132,17 @@ export default function AdminPanel() {
 
   const stats = analytics
     ? [
-        { label: 'Total Users', value: (analytics?.totalUsers || 0).toLocaleString(), desc: `${analytics?.newUsersToday || 0} new today`, icon: <Users className="w-4 h-4 text-indigo-400" /> },
-        { label: 'Resume Uploads', value: (analytics?.resumeUploads || 0).toLocaleString(), desc: `${analytics?.avgResumeScore || 0}% avg score`, icon: <FileText className="w-4 h-4 text-purple-400" /> },
-        { label: 'ATS Health', value: `${analytics?.avgAtsScore || 0}%`, desc: `AI readiness benchmark`, icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
-        { label: 'Open Roles', value: (analytics?.totalJobs || 0).toLocaleString(), desc: `${analytics?.pendingJobs || 0} awaiting review`, icon: <Briefcase className="w-4 h-4 text-rose-400" /> }
-      ]
+      { label: 'Total Users', value: (analytics?.totalUsers || 0).toLocaleString(), desc: `${analytics?.newUsersToday || 0} new today`, icon: <Users className="w-4 h-4 text-indigo-400" /> },
+      { label: 'Resume Uploads', value: (analytics?.resumeUploads || 0).toLocaleString(), desc: `${analytics?.avgResumeScore || 0}% avg score`, icon: <FileText className="w-4 h-4 text-purple-400" /> },
+      { label: 'ATS Health', value: `${analytics?.avgAtsScore || 0}%`, desc: `AI readiness benchmark`, icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
+      { label: 'Open Roles', value: (analytics?.totalJobs || 0).toLocaleString(), desc: `${analytics?.pendingJobs || 0} awaiting review`, icon: <Briefcase className="w-4 h-4 text-rose-400" /> }
+    ]
     : [
-        { label: 'Total Users', value: '—', desc: 'loading...', icon: <Users className="w-4 h-4 text-indigo-400" /> },
-        { label: 'Resume Uploads', value: '—', desc: 'loading...', icon: <FileText className="w-4 h-4 text-purple-400" /> },
-        { label: 'ATS Health', value: '—', desc: 'loading...', icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
-        { label: 'Open Roles', value: '—', desc: 'loading...', icon: <Briefcase className="w-4 h-4 text-rose-400" /> }
-      ];
+      { label: 'Total Users', value: '—', desc: 'loading...', icon: <Users className="w-4 h-4 text-indigo-400" /> },
+      { label: 'Resume Uploads', value: '—', desc: 'loading...', icon: <FileText className="w-4 h-4 text-purple-400" /> },
+      { label: 'ATS Health', value: '—', desc: 'loading...', icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
+      { label: 'Open Roles', value: '—', desc: 'loading...', icon: <Briefcase className="w-4 h-4 text-rose-400" /> }
+    ];
 
   return (
     <div className="py-8 px-4 max-w-7xl mx-auto sm:px-6 lg:px-8 text-left space-y-6">
@@ -214,11 +218,10 @@ export default function AdminPanel() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${
-                      userItem.role === 'admin' ? 'bg-rose-500/10 text-rose-300' :
-                      userItem.role === 'recruiter' ? 'bg-purple-500/10 text-purple-300' :
-                      'bg-indigo-500/10 text-indigo-300'
-                    }`}>
+                    <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${userItem.role === 'admin' ? 'bg-rose-500/10 text-rose-300' :
+                        userItem.role === 'recruiter' ? 'bg-purple-500/10 text-purple-300' :
+                          'bg-indigo-500/10 text-indigo-300'
+                      }`}>
                       {userItem.role}
                     </span>
                     <select
