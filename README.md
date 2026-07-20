@@ -35,6 +35,14 @@ The frontend builds with `npm run build` and publishes `dist/` as a static site.
 - `VITE_CLERK_PUBLISHABLE_KEY` if using Clerk auth locally
 - `MONGODB_URI` if using a persistent database locally instead of the default file-based storage.
 
+To set these for local development, create a `.env.local` file in the root of the project by copying the `.env.example` file:
+
+```bash
+cp .env.example .env.local
+```
+
+Then, edit `.env.local` and fill in your secret keys and local configuration. The backend server can then be started with `npm run start:mock`, which will automatically load variables from this file.
+
 These are required because `@clerk/backend` depends on Node 20+ and the CI workflow is aligned to the same runtime.
 
 ### Render backend
