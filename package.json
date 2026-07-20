@@ -38,7 +38,6 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
     "lucide-react": "^0.417.0",
-<<<<<<< HEAD
     "mongodb": "^6.21.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -47,16 +46,6 @@
   "devDependencies": {
     "@playwright/test": "^1.45.3",
     "@tailwindcss/vite": "^4.3.3",
-=======
-    "mongodb": "^6.17.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "react-router-dom": "^6.25.1",
-    "tailwindcss": "^4.3.2"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.45.3",
->>>>>>> 8d755ce56bc2e29ceaa4955fcce692ccb54bb139
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^16.0.0",
@@ -68,10 +57,7 @@
     "jsdom": "^22.1.0",
     "oxlint": "^0.6.1",
     "supertest": "^7.0.0",
-<<<<<<< HEAD
     "tailwindcss": "^4.3.3",
-=======
->>>>>>> 8d755ce56bc2e29ceaa4955fcce692ccb54bb139
     "vite": "^5.3.5",
     "vitest": "^1.6.0"
   },

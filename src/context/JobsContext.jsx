@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react';
-<<<<<<< HEAD
 import { useAuth } from './useAuth';
 import { calculateMatchScore } from './scoring';
-=======
-import { useAuth } from '../context/useAuth';
-import { calculateMatchScore } from '../utils/scoring';
->>>>>>> 8d755ce56bc2e29ceaa4955fcce692ccb54bb139
 import { JobsContext } from './JobsContextValue';
 
 const INITIAL_JOBS = [
