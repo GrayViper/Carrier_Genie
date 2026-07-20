@@ -1,6 +1,7 @@
 {
   "users": [
     {
+<<<<<<< HEAD
       "id": "usr_yjd9t1k",
       "name": "Ruth",
       "email": "nisimo@gmail.com",
@@ -40,6 +41,8 @@
       "atsScore": 66
     },
     {
+=======
+>>>>>>> 8d755ce56bc2e29ceaa4955fcce692ccb54bb139
       "id": "usr_66ffa9d",
       "name": "Notify User",
       "email": "notifyuser-1784278505835@careergenie.test",
@@ -162,6 +165,7 @@
   ],
   "jobs": [
     {
+<<<<<<< HEAD
       "id": "job_khqbhhz",
       "title": "Senior Fronted Engineer",
       "company": "Ruth",
@@ -184,6 +188,8 @@
       "status": "pending_approval"
     },
     {
+=======
+>>>>>>> 8d755ce56bc2e29ceaa4955fcce692ccb54bb139
       "id": "job_14bi6k6",
       "title": "Read Receipt Job",
       "company": "NotifyCo",
@@ -429,6 +435,7 @@
   ],
   "applications": [
     {
+<<<<<<< HEAD
       "id": "app_z67k09l",
       "studentId": "usr_6an7hzp",
       "studentName": "Kj",
@@ -436,23 +443,39 @@
       "studentSkills": [
         "Python"
       ],
+=======
+      "id": "app_dw0lkc5",
+      "studentId": "usr_0p6rlvq",
+      "studentName": "Read Notify User",
+      "studentEmail": "readnotify-1784278507182@careergenie.test",
+      "studentSkills": [],
+>>>>>>> 8d755ce56bc2e29ceaa4955fcce692ccb54bb139
       "jobId": "job_14bi6k6",
       "jobTitle": "Read Receipt Job",
       "company": "NotifyCo",
       "logo": "N",
       "logoBg": "bg-slate-600",
+<<<<<<< HEAD
       "date": "Jul 20, 2026",
+=======
+      "date": "Jul 17, 2026",
+>>>>>>> 8d755ce56bc2e29ceaa4955fcce692ccb54bb139
       "status": "Applied",
       "matchScore": 0,
       "history": [
         {
           "status": "Applied",
+<<<<<<< HEAD
           "date": "Jul 20, 2026",
+=======
+          "date": "Jul 17, 2026",
+>>>>>>> 8d755ce56bc2e29ceaa4955fcce692ccb54bb139
           "comment": "Application submitted."
         }
       ]
     },
     {
+<<<<<<< HEAD
       "id": "app_dw0lkc5",
       "studentId": "usr_0p6rlvq",
       "studentName": "Read Notify User",
@@ -480,6 +503,13 @@
       "studentName": "Notify User",
       "studentEmail": "notifyuser-1784278505835@careergenie.test",
       "studentSkills": [],
+=======
+      "id": "app_upaibys",
+      "studentId": "usr_66ffa9d",
+      "studentName": "Notify User",
+      "studentEmail": "notifyuser-1784278505835@careergenie.test",
+      "studentSkills": [],
+>>>>>>> 8d755ce56bc2e29ceaa4955fcce692ccb54bb139
       "jobId": "job_jk8ithz",
       "jobTitle": "Approved Job",
       "company": "NotifyCo",
@@ -590,6 +620,7 @@
       "uploaderId": "usr_hm1xbcl",
       "uploaderRole": "student",
       "contentBase64": "QmFja2dyb3VuZCBqb2IgY29udGVudA=="
+<<<<<<< HEAD
     },
     "scan_j8dr4yr": {
       "status": "done",
@@ -619,6 +650,8 @@
           "Include backend or API implementation details if relevant."
         ]
       }
+=======
+>>>>>>> 8d755ce56bc2e29ceaa4955fcce692ccb54bb139
     }
   },
   "notifications": [

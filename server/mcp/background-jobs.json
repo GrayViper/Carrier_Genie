@@ -1,6 +1,7 @@
 {
   "jobs": [
     {
+<<<<<<< HEAD
       "id": "bg_ilgyeran",
       "type": "resume-analysis",
       "status": "queued",
@@ -15,6 +16,34 @@
         "status": "queued",
         "jobId": "scan_j8dr4yr"
       }
+=======
+      "id": "bg_7mbqd9ny",
+      "type": "resume-analysis",
+      "status": "queued",
+      "payload": {
+        "jobId": "scan_86yq4ud",
+        "studentId": "usr_wr6zy83",
+        "fileName": "resume_ai.pdf"
+      },
+      "createdAt": "2026-07-17T08:55:02.569Z",
+      "updatedAt": "2026-07-17T08:55:05.840Z",
+      "result": {
+        "status": "queued",
+        "jobId": "scan_86yq4ud"
+      }
+    },
+    {
+      "id": "bg_lzy9v9l9",
+      "type": "resume-analysis",
+      "status": "queued",
+      "payload": {
+        "jobId": "scan_vbx79yz",
+        "studentId": "usr_hm1xbcl",
+        "fileName": "resume_background.pdf"
+      },
+      "createdAt": "2026-07-17T08:55:05.797Z",
+      "updatedAt": "2026-07-17T08:55:05.797Z"
+>>>>>>> 8d755ce56bc2e29ceaa4955fcce692ccb54bb139
     }
   ]
 }
