@@ -818,6 +818,17 @@ function setupRoutes(app) {
     if (!body.studentId || !body.jobId) return res.status(400).json({ error: 'studentId and jobId required' });
     if (req.user.role !== 'student' && req.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
 
+    const mongoUri = getMongoUri();
+    if (mongoUri) {
+      const db = getDb();
+      const existing = await db.collection('applications').findOne({ jobId: body.jobId, studentId: body.studentId });
+      if (existing) return res.status(409).json({ error: 'You have already applied for this role.' });
+    } else {
+      const data = await readData();
+      const existing = data.applications.find(a => a.jobId === body.jobId && a.studentId === body.studentId);
+      if (existing) return res.status(409).json({ error: 'You have already applied for this role.' });
+    }
+
     const appObj = {
       id: generateId('app'),
       studentId: body.studentId,
@@ -835,7 +846,6 @@ function setupRoutes(app) {
       history: [{ status: 'Applied', date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), comment: 'Application submitted.' }]
     };
 
-    const mongoUri = getMongoUri();
     if (mongoUri) {
       const db = getDb();
       await db.collection('applications').insertOne({ ...appObj });
