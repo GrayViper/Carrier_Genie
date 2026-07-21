@@ -801,7 +801,7 @@ function setupRoutes(app) {
     const body = req.body || {};
     if (!body.studentId || !body.jobId) return res.status(400).json({ error: 'studentId and jobId required' });
     if (req.user.role !== 'student' && req.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-    const data = await readData();
+
     const appObj = {
       id: generateId('app'),
       studentId: body.studentId,
@@ -818,6 +818,15 @@ function setupRoutes(app) {
       matchScore: body.matchScore || 0,
       history: [{ status: 'Applied', date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), comment: 'Application submitted.' }]
     };
+
+    const mongoUri = getMongoUri();
+    if (mongoUri) {
+      const db = getDb();
+      await db.collection('applications').insertOne({ ...appObj });
+      return res.status(201).json({ application: appObj });
+    }
+
+    const data = await readData();
     data.applications.unshift(appObj);
     await writeData(data);
     res.status(201).json({ application: appObj });
@@ -1017,6 +1026,30 @@ function setupRoutes(app) {
     if (user) { const safe = { ...user }; delete safe.passwordHash; return res.json({ user: safe }); }
     return res.status(404).json({ error: 'user not found' });
   });
+
+  app.put('/api/users/:id', authMiddleware, asyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const updates = req.body || {};
+    if (req.user.role !== 'admin' && req.user.sub !== id) return res.status(403).json({ error: 'forbidden' });
+
+    const mongoUri = getMongoUri();
+    if (mongoUri) {
+      const db = getDb();
+      await db.collection('users').updateOne({ id }, { $set: updates });
+      const updatedUser = await db.collection('users').findOne({ id });
+      if (!updatedUser) return res.status(404).json({ error: 'user not found' });
+      const safe = { ...updatedUser }; delete safe.passwordHash; delete safe._id;
+      return res.json({ user: safe });
+    }
+
+    const data = await readData();
+    const index = data.users.findIndex(u => u.id === id);
+    if (index === -1) return res.status(404).json({ error: 'user not found' });
+    data.users[index] = { ...data.users[index], ...updates };
+    await writeData(data);
+    const safe = { ...data.users[index] }; delete safe.passwordHash;
+    return res.json({ user: safe });
+  }));
 
   // Health and readiness endpoints
   app.get('/health', (req, res) => {
