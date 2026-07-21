@@ -60,7 +60,11 @@ export default function RecruiterDashboard() {
     (j.company && user.company && j.company.toLowerCase() === user.company.toLowerCase())
   );
   const jobIds        = recruiterJobs.map(j => j.id);
-  const allApps       = applications.filter(a => jobIds.includes(a.jobId));
+  const userCompanyLower = user.company?.toLowerCase() || '';
+  const allApps       = applications.filter(a =>
+    jobIds.includes(a.jobId) ||
+    (userCompanyLower && a.company && a.company.toLowerCase() === userCompanyLower)
+  );
   const filtered      = allApps
     .filter(a => filterJob === 'all' || a.jobId === filterJob)
     .filter(a =>

@@ -19,12 +19,15 @@ function extractText(base64) {
 /** Simple keyword-based fallback when Gemini is unavailable */
 function localAnalysis(text) {
   const keywords = [
-    'react', 'javascript', 'typescript', 'python', 'node', 'express',
-    'tailwind', 'docker', 'aws', 'mongodb', 'postgresql', 'git',
-    'testing', 'jest', 'machine learning', 'fastapi', 'graphql'
+    'react', 'javascript', 'typescript', 'python', 'java', 'c++', 'c#', 'node', 'express',
+    'html', 'css', 'tailwind', 'bootstrap', 'docker', 'aws', 'azure', 'gcp', 'mongodb',
+    'postgresql', 'sql', 'mysql', 'redis', 'git', 'github', 'testing', 'jest', 'vitest',
+    'machine learning', 'fastapi', 'django', 'flask', 'graphql', 'rest api', 'figma'
   ];
   const lower = text.toLowerCase();
-  const skills = keywords.filter(k => lower.includes(k));
+  const skillsFound = keywords.filter(k => lower.includes(k.toLowerCase()));
+  // Standardize capitalization (e.g. react -> React, python -> Python)
+  const skills = skillsFound.map(s => s.length <= 3 ? s.toUpperCase() : s.charAt(0).toUpperCase() + s.slice(1));
   const score  = Math.min(100, 60 + skills.length * 3 + Math.min(10, Math.floor(text.length / 300)));
   const atsScore = Math.max(50, score - 4);
 
@@ -53,15 +56,17 @@ function localAnalysis(text) {
 
 /** Call Gemini and parse the JSON response */
 async function callGemini(text) {
-  const prompt = `You are an expert resume reviewer. Analyse the following resume text and return ONLY a valid JSON object with exactly these keys:
-- score: integer 0-100 (overall resume quality)
-- atsScore: integer 0-100 (ATS compatibility)
-- skills: array of strings (technical skills detected)
-- strengths: array of 3 strings (what the resume does well)
-- weaknesses: array of 3 strings (what is missing or weak)
-- suggestions: array of 3 strings (specific improvements)
+  const prompt = `You are an expert resume parser and technical recruiter. Analyze the following resume text and extract ALL technical keywords, programming languages, frameworks, libraries, databases, cloud platforms, tools, and methodologies (e.g. Python, React, JavaScript, Node.js, Docker, AWS, MongoDB, SQL, Git, etc.).
 
-Do not include markdown, code fences, or any text outside the JSON object.
+Return ONLY a valid JSON object with exactly these keys:
+- score: integer 0-100 (overall resume quality score)
+- atsScore: integer 0-100 (ATS compatibility score)
+- skills: array of strings (EVERY technical skill/keyword found in the resume, e.g. ["Python", "React", "Node.js", "JavaScript", "Docker", "Git", "MongoDB"])
+- strengths: array of 3 strings (key strengths found in the resume)
+- weaknesses: array of 3 strings (areas missing or weak)
+- suggestions: array of 3 strings (actionable advice to improve)
+
+Do not include markdown code fences or any text outside the JSON object.
 
 Resume text:
 ${text.slice(0, 4000)}`;
