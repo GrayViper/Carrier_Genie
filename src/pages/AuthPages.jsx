@@ -236,7 +236,7 @@ export default function AuthPages() {
                   <button
                     key={item.value}
                     type="button"
-                    onClick={() => setRole(item.value)}
+                    onClick={() => handleRoleChange(item.value)}
                     className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border p-3 text-center transition ${
                       role === item.value 
                         ? 'border-indigo-500 bg-indigo-600/10 text-indigo-400 shadow-lg shadow-indigo-500/10' 
@@ -249,6 +249,30 @@ export default function AuthPages() {
                 ))}
               </div>
             </div>
+
+            {/* Quick Demo Fill Button */}
+            {isLogin && (
+              <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-2.5 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (role === 'student') {
+                      setEmail('olivia@gmail.com');
+                      setPassword('');
+                    } else if (role === 'recruiter') {
+                      setEmail('david@stripe.com');
+                      setPassword('');
+                    } else {
+                      setEmail('admin@careergenie.com');
+                      setPassword('');
+                    }
+                  }}
+                  className="text-xs text-indigo-300 hover:text-indigo-200 font-semibold underline cursor-pointer"
+                >
+                  ⚡ Auto-fill demo credentials for {role.charAt(0).toUpperCase() + role.slice(1)}
+                </button>
+              </div>
+            )}
 
             {/* Save credentials toggle */}
             <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-gray-300">
