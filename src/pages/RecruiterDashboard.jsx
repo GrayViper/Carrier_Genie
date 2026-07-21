@@ -61,10 +61,15 @@ export default function RecruiterDashboard() {
   );
   const jobIds        = recruiterJobs.map(j => j.id);
   const userCompanyLower = user.company?.toLowerCase() || '';
-  const allApps       = applications.filter(a =>
-    jobIds.includes(a.jobId) ||
-    (userCompanyLower && a.company && a.company.toLowerCase() === userCompanyLower)
-  );
+  // Show all submitted applications or filter by recruiter company if specified
+  const allApps       = applications.filter(a => {
+    if (!userCompanyLower && jobIds.length === 0) return true; // Show all applications if default demo recruiter
+    return (
+      jobIds.includes(a.jobId) ||
+      (userCompanyLower && a.company && a.company.toLowerCase() === userCompanyLower) ||
+      (recruiterJobs.length > 0 && recruiterJobs.some(rj => rj.id === a.jobId || rj.company?.toLowerCase() === a.company?.toLowerCase()))
+    );
+  });
   const filtered      = allApps
     .filter(a => filterJob === 'all' || a.jobId === filterJob)
     .filter(a =>
