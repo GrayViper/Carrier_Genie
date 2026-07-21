@@ -7,15 +7,7 @@ export default function AdminPanel() {
   const { user, getAuthToken } = useAuth();
   const { jobs, approveJob, rejectJob } = useJobs();
 
-  const [mockUsers, setMockUsers] = useState([
-    { id: 'usr_student', name: 'Olivia Chen', email: 'olivia@gmail.com', role: 'student', details: 'Resume Score: 84%' },
-    { id: 'usr_student_test_flow', name: 'Test Student Flow', email: 'test-flow@student.com', role: 'student', details: 'Resume Score: N/A' },
-    { id: 'usr_recruiter_test_flow', name: 'Test Recruiter', email: 'test-recruiter@company.com', role: 'recruiter', details: 'Company: TestCo' },
-    { id: 'usr_recruiter', name: 'David Miller', email: 'david@stripe.com', role: 'recruiter', details: 'Company: Stripe' },
-    { id: 'usr_admin', name: 'Alex Mercer', email: 'admin@careergenie.com', role: 'admin', details: 'System Overseer' },
-    { id: 'usr_mock_stud_2', name: 'James Carter', email: 'james@gmail.com', role: 'student', details: 'Resume Score: 62%' },
-    { id: 'usr_mock_rec_2', name: 'Sarah Patel', email: 'sarah@google.com', role: 'recruiter', details: 'Company: Google' }
-  ]);
+  const [mockUsers, setMockUsers] = useState([]);
 
   const [notification, setNotification] = useState('');
   const [analytics, setAnalytics] = useState(null);
@@ -30,9 +22,10 @@ export default function AdminPanel() {
         const token = await getAuthToken();
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-        const [analyticsRes, resumesRes] = await Promise.all([
+        const [analyticsRes, resumesRes, usersRes] = await Promise.all([
           fetch(`${API_BASE}/api/admin/analytics`, { headers }),
-          fetch(`${API_BASE}/api/admin/resumes`, { headers })
+          fetch(`${API_BASE}/api/admin/resumes`, { headers }),
+          fetch(`${API_BASE}/api/admin/users`, { headers })
         ]);
 
         if (!analyticsRes.ok || !resumesRes.ok) {
@@ -46,6 +39,13 @@ export default function AdminPanel() {
         setResumes(resumesData.resumes || []);
         setAvgAiScore(resumesData.avgAiScore || 0);
         setPendingResumes(resumesData.pendingResumes || 0);
+
+        if (usersRes.ok) {
+          const usersData = await usersRes.json();
+          if (usersData.users && usersData.users.length > 0) {
+            setMockUsers(usersData.users);
+          }
+        }
       } catch (error) {
         setAnalytics({
           totalUsers: 3,
@@ -208,10 +208,10 @@ export default function AdminPanel() {
                 <div key={userItem.id} className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-400 text-sm font-semibold text-white">
-                      {userItem.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}
+                      {userItem.name ? userItem.name.split(' ').map((part) => part[0]).join('').slice(0, 2) : 'U'}
                     </div>
                     <div>
-                      <div className="font-semibold text-white">{userItem.name}</div>
+                      <div className="font-semibold text-white">{userItem.name || 'Registered User'}</div>
                       <div className="text-sm text-gray-400">{userItem.email}</div>
                       <div className="text-xs text-gray-500">{userItem.details}</div>
                     </div>
@@ -236,6 +236,13 @@ export default function AdminPanel() {
                   </div>
                 </div>
               ))}
+
+              {mockUsers.length === 0 && (
+                <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 p-8 text-center text-sm text-gray-400">
+                  <p className="font-semibold text-white">No active students or recruiters logged in yet.</p>
+                  <p className="mt-1 text-xs text-gray-500">As soon as students or recruiters register or log in, their profiles will populate here for role moderation.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

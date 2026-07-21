@@ -1,6 +1,144 @@
 {
   "users": [
     {
+      "id": "usr_jz4cvk3",
+      "name": "Read Notify User",
+      "email": "readnotify-1784647737493@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$L2b8OtS3Sq80iKeWhlR3Iu3jUuUdhFvG2uOMdcDunG3fhKdzuWlkO"
+    },
+    {
+      "id": "usr_d8lnkl2",
+      "name": "Notify User",
+      "email": "notifyuser-1784647736580@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$hUFU7wTaosxo7EZU5WKlDuC2Mpvienbadq0ssH4vZz4KS5t7CcIlS"
+    },
+    {
+      "id": "usr_lmnl8r9",
+      "name": "Background User",
+      "email": "bguser-1784647736134@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$GU07Z.HW57kjBALyNpRTJOiaz9h6Ah7SKcJI7I4vEH69cO4f.TgXy"
+    },
+    {
+      "id": "usr_7p33x02",
+      "name": "AI User",
+      "email": "aiuser-1784647733312@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$GNk7W.Wj0R.GroStjaUqCO2D.V8dQa2ONw/ieYgDADx3O56ERI6HO",
+      "resumeUploaded": true,
+      "resumeName": "resume_ai.pdf",
+      "resumeScore": 60,
+      "skills": [],
+      "feedback": {
+        "score": 60,
+        "strengths": [
+          "Resume has a clear structure and readable content."
+        ],
+        "weaknesses": [
+          "No automated testing frameworks explicitly mentioned.",
+          "Limited container or cloud infrastructure detail."
+        ],
+        "suggestions": [
+          "Add a section mentioning testing tools or automation practices.",
+          "Consider adding a Docker/cloud deployment example.",
+          "Include backend or API implementation details if relevant."
+        ]
+      },
+      "atsScore": 56
+    },
+    {
+      "id": "usr_emv3atk",
+      "name": "Fail User",
+      "email": "failuser-1784647732736@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$af/UeWId55BZ8OBg7FtAMeYP7.EoDt/RoRIRntNMOS2HpNfQczFLO"
+    },
+    {
+      "id": "usr_zifqw1t",
+      "name": "Login User",
+      "email": "loginuser-1784647732189@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$2ZlJVTn614e7/gdoJX4WI.QJhoWUi3T6xB8LViQvwg9n8NKfKwyRy"
+    },
+    {
+      "id": "usr_764dhtv",
+      "name": "New User",
+      "email": "newuser-1784647731903@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$1SNr6N6F1KisJSoKl0x.8.Wyda17mTqkL2NgpPnwEobZSuOAUUY6i"
+    },
+    {
+      "id": "usr_vkf045q",
+      "name": "Read Notify User",
+      "email": "readnotify-1784647713212@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$HoR06Ejcln4jW82J0XMf5.nf.uiQqp8N5uwhk3bRQlwfd6sNzVcka"
+    },
+    {
+      "id": "usr_flzf4ao",
+      "name": "Notify User",
+      "email": "notifyuser-1784647708201@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$gVs9zDfVB/gEa8fgTpwhpuqtXUG5jM/vJMeLg1/./fuCiDGQSut5y"
+    },
+    {
+      "id": "usr_s0li71v",
+      "name": "Background User",
+      "email": "bguser-1784647707747@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$y98yzadNu0tjKiQxE5epHeCzWe50v.7wkVt0DZzCCvfeWVwFTW4/S"
+    },
+    {
+      "id": "usr_pl4robn",
+      "name": "AI User",
+      "email": "aiuser-1784647703271@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$3T0OON3JHxw3GEk5bwsXX.cuCx.TUNdX8HvN7zgw2v5V5UXBX7Fze",
+      "resumeUploaded": true,
+      "resumeName": "resume_ai.pdf",
+      "resumeScore": 60,
+      "skills": [],
+      "feedback": {
+        "score": 60,
+        "strengths": [
+          "Resume has a clear structure and readable content."
+        ],
+        "weaknesses": [
+          "No automated testing frameworks explicitly mentioned.",
+          "Limited container or cloud infrastructure detail."
+        ],
+        "suggestions": [
+          "Add a section mentioning testing tools or automation practices.",
+          "Consider adding a Docker/cloud deployment example.",
+          "Include backend or API implementation details if relevant."
+        ]
+      },
+      "atsScore": 56
+    },
+    {
+      "id": "usr_1m1gbji",
+      "name": "Fail User",
+      "email": "failuser-1784647702715@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$xgiek3/x5PDma7N6ZI1w0.inQ576z31KP33mhfhb085LUfwiDXieK"
+    },
+    {
+      "id": "usr_i61qmir",
+      "name": "Login User",
+      "email": "loginuser-1784647702126@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$VpdLfdZVtJKQfqMLMByMOORCGrIAeEY2p4XYBultMg80NntmWpH1O"
+    },
+    {
+      "id": "usr_u3gpi0m",
+      "name": "New User",
+      "email": "newuser-1784647701842@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$Jp.x0XGJWyfz75G8GAlZWOs4SYY1sSfDvAx1kE.8h10AnRJs.iGOa"
+    },
+    {
       "id": "usr_s8a3i4l",
       "name": "Notify User",
       "email": "notifyuser-1784644845670@careergenie.test",
@@ -273,6 +411,125 @@
     }
   ],
   "jobs": [
+    {
+      "id": "job_12jwuck",
+      "title": "Read Receipt Job",
+      "company": "NotifyCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "Needs approval",
+      "requirements": [],
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "N",
+      "logoBg": "bg-slate-600",
+      "status": "active"
+    },
+    {
+      "id": "job_hxt8n8f",
+      "title": "Approved Job",
+      "company": "NotifyCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "Needs approval",
+      "requirements": [],
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "N",
+      "logoBg": "bg-slate-600",
+      "status": "active"
+    },
+    {
+      "id": "job_2dw8zua",
+      "title": "Rotated Job",
+      "company": "RotateCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "",
+      "requirements": [],
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "R",
+      "logoBg": "bg-slate-600",
+      "status": "pending_approval"
+    },
+    {
+      "id": "job_6cccyxf",
+      "title": "Secure Job",
+      "company": "SecureCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "",
+      "requirements": [],
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "S",
+      "logoBg": "bg-slate-600",
+      "status": "pending_approval"
+    },
+    {
+      "id": "job_unspkv6",
+      "title": "Approved Job",
+      "company": "NotifyCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "Needs approval",
+      "requirements": [],
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "N",
+      "logoBg": "bg-slate-600",
+      "status": "pending_approval"
+    },
+    {
+      "id": "job_yylpeww",
+      "title": "Rotated Job",
+      "company": "RotateCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "",
+      "requirements": [],
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "R",
+      "logoBg": "bg-slate-600",
+      "status": "pending_approval"
+    },
+    {
+      "id": "job_0tlq9c3",
+      "title": "Secure Job",
+      "company": "SecureCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "",
+      "requirements": [],
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "S",
+      "logoBg": "bg-slate-600",
+      "status": "pending_approval"
+    },
     {
       "id": "job_eu0edlh",
       "title": "Read Receipt Job",
@@ -820,6 +1077,72 @@
   ],
   "applications": [
     {
+      "id": "app_gi3702w",
+      "studentId": "usr_jz4cvk3",
+      "studentName": "Read Notify User",
+      "studentEmail": "readnotify-1784647737493@careergenie.test",
+      "studentSkills": [],
+      "jobId": "job_12jwuck",
+      "jobTitle": "Read Receipt Job",
+      "company": "NotifyCo",
+      "logo": "N",
+      "logoBg": "bg-slate-600",
+      "date": "Jul 21, 2026",
+      "status": "Applied",
+      "matchScore": 0,
+      "history": [
+        {
+          "status": "Applied",
+          "date": "Jul 21, 2026",
+          "comment": "Application submitted."
+        }
+      ]
+    },
+    {
+      "id": "app_2c4d5x9",
+      "studentId": "usr_d8lnkl2",
+      "studentName": "Notify User",
+      "studentEmail": "notifyuser-1784647736580@careergenie.test",
+      "studentSkills": [],
+      "jobId": "job_hxt8n8f",
+      "jobTitle": "Approved Job",
+      "company": "NotifyCo",
+      "logo": "N",
+      "logoBg": "bg-slate-600",
+      "date": "Jul 21, 2026",
+      "status": "Applied",
+      "matchScore": 0,
+      "history": [
+        {
+          "status": "Applied",
+          "date": "Jul 21, 2026",
+          "comment": "Application submitted."
+        }
+      ]
+    },
+    {
+      "id": "app_tb43viy",
+      "studentId": "usr_flzf4ao",
+      "studentName": "Notify User",
+      "studentEmail": "notifyuser-1784647708201@careergenie.test",
+      "studentSkills": [],
+      "jobId": "job_unspkv6",
+      "jobTitle": "Approved Job",
+      "company": "NotifyCo",
+      "logo": "N",
+      "logoBg": "bg-slate-600",
+      "date": "Jul 21, 2026",
+      "status": "Applied",
+      "matchScore": 0,
+      "history": [
+        {
+          "status": "Applied",
+          "date": "Jul 21, 2026",
+          "comment": "Application submitted."
+        }
+      ]
+    },
+    {
       "id": "app_33uf6ro",
       "studentId": "usr_tuk3w0t",
       "studentName": "Read Notify User",
@@ -1097,6 +1420,86 @@
       "uploaderId": "usr_qrh0csv",
       "uploaderRole": "student",
       "contentBase64": "QmFja2dyb3VuZCBqb2IgY29udGVudA=="
+    },
+    "scan_5jb8lbu": {
+      "status": "done",
+      "studentId": "usr_pl4robn",
+      "fileName": "resume_ai.pdf",
+      "score": 60,
+      "atsScore": 56,
+      "finishedAt": "2026-07-21T15:28:32.740Z",
+      "startedAt": "2026-07-21T15:28:24.236Z",
+      "contentBase64": "QUktZHJpdmVuIHJlc3VtZSBjb250ZW50IHNhbXBsZQ==",
+      "studentEmail": "aiuser-1784647703271@careergenie.test",
+      "studentRole": "student",
+      "uploaderId": "usr_pl4robn",
+      "uploaderRole": "student",
+      "analysis": {
+        "skills": [],
+        "strengths": [
+          "Resume has a clear structure and readable content."
+        ],
+        "weaknesses": [
+          "No automated testing frameworks explicitly mentioned.",
+          "Limited container or cloud infrastructure detail."
+        ],
+        "suggestions": [
+          "Add a section mentioning testing tools or automation practices.",
+          "Consider adding a Docker/cloud deployment example.",
+          "Include backend or API implementation details if relevant."
+        ]
+      }
+    },
+    "scan_1m6fqzv": {
+      "status": "pending",
+      "studentId": "usr_s0li71v",
+      "fileName": "resume_background.pdf",
+      "startedAt": "2026-07-21T15:28:28.189Z",
+      "studentEmail": "bguser-1784647707747@careergenie.test",
+      "studentRole": "student",
+      "uploaderId": "usr_s0li71v",
+      "uploaderRole": "student",
+      "contentBase64": "QmFja2dyb3VuZCBqb2IgY29udGVudA=="
+    },
+    "scan_8cyio39": {
+      "status": "done",
+      "studentId": "usr_7p33x02",
+      "fileName": "resume_ai.pdf",
+      "score": 60,
+      "atsScore": 56,
+      "finishedAt": "2026-07-21T15:28:58.221Z",
+      "startedAt": "2026-07-21T15:28:53.964Z",
+      "contentBase64": "QUktZHJpdmVuIHJlc3VtZSBjb250ZW50IHNhbXBsZQ==",
+      "studentEmail": "aiuser-1784647733312@careergenie.test",
+      "studentRole": "student",
+      "uploaderId": "usr_7p33x02",
+      "uploaderRole": "student",
+      "analysis": {
+        "skills": [],
+        "strengths": [
+          "Resume has a clear structure and readable content."
+        ],
+        "weaknesses": [
+          "No automated testing frameworks explicitly mentioned.",
+          "Limited container or cloud infrastructure detail."
+        ],
+        "suggestions": [
+          "Add a section mentioning testing tools or automation practices.",
+          "Consider adding a Docker/cloud deployment example.",
+          "Include backend or API implementation details if relevant."
+        ]
+      }
+    },
+    "scan_jzc50uh": {
+      "status": "pending",
+      "studentId": "usr_lmnl8r9",
+      "fileName": "resume_background.pdf",
+      "startedAt": "2026-07-21T15:28:56.561Z",
+      "studentEmail": "bguser-1784647736134@careergenie.test",
+      "studentRole": "student",
+      "uploaderId": "usr_lmnl8r9",
+      "uploaderRole": "student",
+      "contentBase64": "QmFja2dyb3VuZCBqb2IgY29udGVudA=="
     }
   },
   "notifications": [
@@ -1183,6 +1586,48 @@
       },
       "createdAt": "2026-07-21T14:40:47.283Z",
       "read": true
+    },
+    {
+      "id": "notif_1khc8lv",
+      "type": "job_approved",
+      "recipientId": "usr_d8lnkl2",
+      "recipientEmail": "notifyuser-1784647736580@careergenie.test",
+      "jobId": "job_hxt8n8f",
+      "jobTitle": "Approved Job",
+      "company": "NotifyCo",
+      "message": "Your application for Approved Job at NotifyCo has been approved.",
+      "subject": "Your application for Approved Job has been approved",
+      "delivery": {
+        "channel": "email",
+        "status": "queued",
+        "provider": "mock",
+        "sentAt": "2026-07-21T15:28:57.334Z",
+        "to": "notifyuser-1784647736580@careergenie.test",
+        "messageId": null
+      },
+      "createdAt": "2026-07-21T15:28:57.334Z",
+      "read": false
+    },
+    {
+      "id": "notif_djfwbky",
+      "type": "job_approved",
+      "recipientId": "usr_jz4cvk3",
+      "recipientEmail": "readnotify-1784647737493@careergenie.test",
+      "jobId": "job_12jwuck",
+      "jobTitle": "Read Receipt Job",
+      "company": "NotifyCo",
+      "message": "Your application for Read Receipt Job at NotifyCo has been approved.",
+      "subject": "Your application for Read Receipt Job has been approved",
+      "delivery": {
+        "channel": "email",
+        "status": "queued",
+        "provider": "mock",
+        "sentAt": "2026-07-21T15:28:58.278Z",
+        "to": "readnotify-1784647737493@careergenie.test",
+        "messageId": null
+      },
+      "createdAt": "2026-07-21T15:28:58.278Z",
+      "read": true
     }
   ],
   "loginEmails": [
@@ -1191,6 +1636,8 @@
     "loginuser-1784615848171@careergenie.test",
     "anilcpkjn@gmail.com",
     "loginuser-1784644628223@careergenie.test",
-    "loginuser-1784644839598@careergenie.test"
+    "loginuser-1784644839598@careergenie.test",
+    "loginuser-1784647702126@careergenie.test",
+    "loginuser-1784647732189@careergenie.test"
   ]
 }

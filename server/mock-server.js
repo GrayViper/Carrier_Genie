@@ -91,8 +91,6 @@ async function tryAnalyzeResume(contentBase64, fileName) {
 function getInitialData() {
   return {
     users: [
-      { id: 'usr_student', name: 'Olivia Chen', email: 'olivia@gmail.com', role: 'student', skills: ['React', 'JavaScript'], resumeUploaded: true, resumeName: 'Olivia_Chen_Resume_2026.pdf', resumeScore: 84, feedback: {}, atsScore: 84 },
-      { id: 'usr_recruiter', name: 'David Miller', email: 'david@stripe.com', role: 'recruiter', company: 'Stripe', companyLogo: 'S' },
       { id: 'usr_admin', name: 'Alex Mercer', email: 'admin@careergenie.com', role: 'admin' }
     ],
     jobs: [
@@ -972,6 +970,38 @@ function setupRoutes(app) {
     const totalResumes = resumes.length;
     const pendingResumes = resumes.filter((item) => item.status === 'pending').length;
     return res.json({ resumes, total: totalResumes, avgAiScore, pendingResumes });
+  }));
+
+  app.get('/api/admin/users', authMiddleware, asyncHandler(async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+    const db = getDb();
+    let usersList = [];
+    if (db) {
+      const mongoUsers = await db.collection('users').find({}).toArray();
+      usersList = mongoUsers.map(u => ({
+        id: u.id || u._id.toString(),
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        company: u.company || null,
+        details: u.role === 'student'
+          ? (u.resumeScore ? `Resume Score: ${u.resumeScore}%` : 'Registered Student')
+          : (u.role === 'recruiter' ? `Company: ${u.company || 'N/A'}` : 'System Overseer')
+      }));
+    } else {
+      const data = await readData();
+      usersList = (data.users || []).map(u => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        company: u.company || null,
+        details: u.role === 'student'
+          ? (u.resumeScore ? `Resume Score: ${u.resumeScore}%` : 'Registered Student')
+          : (u.role === 'recruiter' ? `Company: ${u.company || 'N/A'}` : 'System Overseer')
+      }));
+    }
+    return res.json({ users: usersList });
   }));
 
   app.get('/api/admin/analytics', authMiddleware, asyncHandler(async (req, res) => {
