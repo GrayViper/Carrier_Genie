@@ -255,7 +255,25 @@ export function createApp() {
   app.set('trust proxy', 1);
 
   app.use(cors({
-    origin: frontendOrigin,
+    origin: (origin, callback) => {
+      // In development or when there is no origin (e.g. server-to-server or curl requests), allow it
+      if (!origin || frontendOrigin === '*') {
+        return callback(null, true);
+      }
+      
+      // Strict matching for exact configured origin
+      if (origin === frontendOrigin) {
+        return callback(null, true);
+      }
+
+      // Automatically allow Vercel previews and deployments
+      if (/\.vercel\.app$/.test(origin)) {
+        return callback(null, true);
+      }
+
+      // Otherwise block
+      callback(new Error('Not allowed by CORS'));
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
