@@ -1,6 +1,78 @@
 {
   "users": [
     {
+      "id": "usr_x8exd50",
+      "name": "Read Notify User",
+      "email": "readnotify-1784615861496@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$q4aYonjCXXBeoBYKjx2PQ.Cvbp.jfR.gdIh4Ef2CWxVMntzvvbL8i"
+    },
+    {
+      "id": "usr_l8c45qe",
+      "name": "Notify User",
+      "email": "notifyuser-1784615859241@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$FMfyLUKkshJ7/M0WCfqrS..lpj1JYqx1Zw4O2wbaIxXTo60pvspqq"
+    },
+    {
+      "id": "usr_p3u9id0",
+      "name": "Background User",
+      "email": "bguser-1784615854231@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$/nVh8TUMp.4QQ3DchsrRLeIM3JBeipw0HXAs5WEbFuvgj6OPqO1kK"
+    },
+    {
+      "id": "usr_mwcqcfn",
+      "name": "AI User",
+      "email": "aiuser-1784615849219@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$DENLlPhsB/UGFU/Y9v59e.ya0Nvo9CbtMO1wdkINDjH6tDCSM7EUW",
+      "resumeUploaded": true,
+      "resumeName": "resume_ai.pdf",
+      "resumeScore": 76,
+      "skills": [
+        "Git",
+        "Docker"
+      ],
+      "feedback": {
+        "score": 76,
+        "strengths": [
+          "Clear project descriptions with strong frontend focus.",
+          "Demonstrates collaboration and modern tooling awareness."
+        ],
+        "weaknesses": [
+          "Limited cloud deployment detail.",
+          "No explicit backend testing framework shown."
+        ],
+        "suggestions": [
+          "Add a Docker or cloud deployment example.",
+          "Mention testing tools or automation experience."
+        ]
+      },
+      "atsScore": 72
+    },
+    {
+      "id": "usr_yei1gf5",
+      "name": "Fail User",
+      "email": "failuser-1784615848686@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$Sk4yRjFUHV8xaQQKJlRMu.yJ0pgbuxVQkoXzCb.8dPITNgmX0xjiG"
+    },
+    {
+      "id": "usr_30zvw8p",
+      "name": "Login User",
+      "email": "loginuser-1784615848171@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$QbRICuy5b9qijN0hPmPP4uZ4WfpqUuIAG8jeZhqjzVSeUY31k6aV2"
+    },
+    {
+      "id": "usr_8ostnsv",
+      "name": "New User",
+      "email": "newuser-1784615847885@careergenie.test",
+      "role": "student",
+      "passwordHash": "$2a$12$IJbe9bD6JWL/6YZwUrD/fOQkILMotm7e8/j79XNjje40YNjAINXAW"
+    },
+    {
       "id": "usr_student",
       "name": "Olivia Chen",
       "email": "olivia@gmail.com",
@@ -31,6 +103,40 @@
     }
   ],
   "jobs": [
+    {
+      "id": "job_3t88bzm",
+      "title": "Approved Job",
+      "company": "NotifyCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "Needs approval",
+      "requirements": [],
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "N",
+      "logoBg": "bg-slate-600",
+      "status": "pending_approval"
+    },
+    {
+      "id": "job_dh1wqvn",
+      "title": "Rotated Job",
+      "company": "RotateCo",
+      "location": "Remote",
+      "type": "Full-time",
+      "tags": [],
+      "description": "",
+      "requirements": [],
+      "salary": "Competitive",
+      "deadline": "TBD",
+      "posterId": null,
+      "posterName": null,
+      "logo": "R",
+      "logoBg": "bg-slate-600",
+      "status": "pending_approval"
+    },
     {
       "id": "job_stripe_spd",
       "title": "Sr. Product Designer",
@@ -187,10 +293,44 @@
     }
   ],
   "applications": [],
-  "resumeResults": {},
+  "resumeResults": {
+    "scan_1csnnhi": {
+      "status": "done",
+      "studentId": "usr_mwcqcfn",
+      "fileName": "resume_ai.pdf",
+      "score": 76,
+      "atsScore": 72,
+      "finishedAt": "2026-07-21T06:37:43.288Z",
+      "startedAt": "2026-07-21T06:37:41.150Z",
+      "contentBase64": "QUktZHJpdmVuIHJlc3VtZSBjb250ZW50IHNhbXBsZQ==",
+      "studentEmail": "aiuser-1784615849219@careergenie.test",
+      "studentRole": "student",
+      "uploaderId": "usr_mwcqcfn",
+      "uploaderRole": "student",
+      "analysis": {
+        "skills": [
+          "Git",
+          "Docker"
+        ],
+        "strengths": [
+          "Clear project descriptions with strong frontend focus.",
+          "Demonstrates collaboration and modern tooling awareness."
+        ],
+        "weaknesses": [
+          "Limited cloud deployment detail.",
+          "No explicit backend testing framework shown."
+        ],
+        "suggestions": [
+          "Add a Docker or cloud deployment example.",
+          "Mention testing tools or automation experience."
+        ]
+      }
+    }
+  },
   "notifications": [],
   "loginEmails": [
     "olivia@gmail.com",
-    "david@stripe.com"
+    "david@stripe.com",
+    "loginuser-1784615848171@careergenie.test"
   ]
 }

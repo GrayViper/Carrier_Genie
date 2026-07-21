@@ -1,49 +1,20 @@
 {
   "jobs": [
     {
-<<<<<<< HEAD
-      "id": "bg_ilgyeran",
+      "id": "bg_xw6tft1k",
       "type": "resume-analysis",
       "status": "queued",
       "payload": {
-        "jobId": "scan_j8dr4yr",
-        "studentId": "usr_6an7hzp",
-        "fileName": "CSE121CV.pdf"
-      },
-      "createdAt": "2026-07-20T16:35:43.607Z",
-      "updatedAt": "2026-07-20T16:35:43.614Z",
-      "result": {
-        "status": "queued",
-        "jobId": "scan_j8dr4yr"
-      }
-=======
-      "id": "bg_7mbqd9ny",
-      "type": "resume-analysis",
-      "status": "queued",
-      "payload": {
-        "jobId": "scan_86yq4ud",
-        "studentId": "usr_wr6zy83",
+        "jobId": "scan_1csnnhi",
+        "studentId": "usr_mwcqcfn",
         "fileName": "resume_ai.pdf"
       },
-      "createdAt": "2026-07-17T08:55:02.569Z",
-      "updatedAt": "2026-07-17T08:55:05.840Z",
+      "createdAt": "2026-07-21T06:37:41.151Z",
+      "updatedAt": "2026-07-21T06:37:41.160Z",
       "result": {
         "status": "queued",
-        "jobId": "scan_86yq4ud"
+        "jobId": "scan_1csnnhi"
       }
-    },
-    {
-      "id": "bg_lzy9v9l9",
-      "type": "resume-analysis",
-      "status": "queued",
-      "payload": {
-        "jobId": "scan_vbx79yz",
-        "studentId": "usr_hm1xbcl",
-        "fileName": "resume_background.pdf"
-      },
-      "createdAt": "2026-07-17T08:55:05.797Z",
-      "updatedAt": "2026-07-17T08:55:05.797Z"
->>>>>>> 8d755ce56bc2e29ceaa4955fcce692ccb54bb139
     }
   ]
 }
