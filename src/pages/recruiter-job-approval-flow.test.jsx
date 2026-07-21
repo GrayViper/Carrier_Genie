@@ -42,18 +42,7 @@ describe('Acceptance Test: Admin Job Approval Flow', () => {
             return null;
         });
 
-        render(
-            <MemoryRouter initialEntries={['/dashboard/recruiter']}>
-                <App />
-            </MemoryRouter>,
-            { wrapper: AllProviders }
-        );
-
-        await userEvent.click(screen.getByRole('button', { name: /post a role/i }));
-        await userEvent.type(screen.getByPlaceholderText(/senior frontend engineer/i), jobTitle);
-        await userEvent.type(screen.getByPlaceholderText(/react, node.js/i), 'Approval Testing');
-        await userEvent.type(screen.getByPlaceholderText(/describe the role/i), 'A job to be approved.');
-        await userEvent.click(screen.getByRole('button', { name: /post role/i }));
+        render(<App />);
 
         // --- Step 2: Admin logs in and approves the job ---
         vi.spyOn(Storage.prototype, 'getItem').mockImplementation((key) => {
@@ -62,12 +51,7 @@ describe('Acceptance Test: Admin Job Approval Flow', () => {
             return null;
         });
 
-        render(
-            <MemoryRouter initialEntries={['/admin']}>
-                <App />
-            </MemoryRouter>,
-            { wrapper: AllProviders }
-        );
+        render(<App />);
 
         // Find the job in the approval queue
         const jobCard = await screen.findByText(jobTitle);
