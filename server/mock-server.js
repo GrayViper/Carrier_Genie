@@ -36,7 +36,7 @@ async function analyzeResumeWithPython(contentBase64, fileName) {
     const timeout = setTimeout(() => {
       child.kill();
       reject(new Error('Python analyzer timed out'));
-    }, 2000);
+    }, 10000);
 
     const stdout = [];
     const stderr = [];
@@ -461,31 +461,36 @@ async function writeData(data) {
   if (mongoUri) {
     await ensureData();
     const db = getDb();
+    // Helper to remove _id so MongoDB generates clean unique ObjectIds upon re-inserting
+    const sanitizeDoc = (doc) => {
+      const { _id, ...rest } = doc;
+      return rest;
+    };
     // Replace collections atomically by clearing and inserting
     if (Array.isArray(data.users)) {
       const col = db.collection('users');
       await col.deleteMany({});
-      if (data.users.length) await col.insertMany(data.users.map(u => ({ ...u })));
+      if (data.users.length) await col.insertMany(data.users.map(sanitizeDoc));
     }
     if (Array.isArray(data.jobs)) {
       const col = db.collection('jobs');
       await col.deleteMany({});
-      if (data.jobs.length) await col.insertMany(data.jobs.map(j => ({ ...j })));
+      if (data.jobs.length) await col.insertMany(data.jobs.map(sanitizeDoc));
     }
     if (Array.isArray(data.applications)) {
       const col = db.collection('applications');
       await col.deleteMany({});
-      if (data.applications.length) await col.insertMany(data.applications.map(a => ({ ...a })));
+      if (data.applications.length) await col.insertMany(data.applications.map(sanitizeDoc));
     }
     if (Array.isArray(data.notifications)) {
       const col = db.collection('notifications');
       await col.deleteMany({});
-      if (data.notifications.length) await col.insertMany(data.notifications.map(n => ({ ...n })));
+      if (data.notifications.length) await col.insertMany(data.notifications.map(sanitizeDoc));
     }
     if (data.resumeResults && typeof data.resumeResults === 'object') {
       const col = db.collection('resumeResults');
       await col.deleteMany({});
-      const docs = Object.entries(data.resumeResults).map(([k, v]) => ({ jobId: k, ...v }));
+      const docs = Object.entries(data.resumeResults).map(([k, v]) => sanitizeDoc({ jobId: k, ...v }));
       if (docs.length) await col.insertMany(docs);
     }
     return;
