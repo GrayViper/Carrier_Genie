@@ -684,7 +684,11 @@ function setupRoutes(app) {
     if (emailValue && !data.loginEmails) data.loginEmails = [];
     if (emailValue && !data.loginEmails.includes(emailValue)) {
       data.loginEmails.push(emailValue);
-      await writeData(data);
+      // write updated loginEmails without full writeData if mongoUri is present
+      const mongoUri = getMongoUri();
+      if (!mongoUri) {
+        await writeData(data);
+      }
     }
 
     const token = signToken(user);

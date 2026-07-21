@@ -127,10 +127,13 @@ export const ApplicationsProvider = ({ children }) => {
       return;
     }
 
-    const storageKey = getStorageKey(userId);
-    localStorage.setItem(storageKey, JSON.stringify(applications));
-    localStorage.removeItem('cg_applications');
-  }, [applications, userId]);
+    // Only update local storage cache if user is student (so student keeps their submitted apps locally)
+    if (user?.role === 'student') {
+      const storageKey = getStorageKey(userId);
+      localStorage.setItem(storageKey, JSON.stringify(applications));
+      localStorage.removeItem('cg_applications');
+    }
+  }, [applications, userId, user?.role]);
 
   const applyToJob = async (job, student, matchScore) => {
     const isAlreadyApplied = applications.some(app => app.jobId === job.id && app.studentId === student.id);
