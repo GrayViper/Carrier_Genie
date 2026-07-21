@@ -231,46 +231,78 @@ export default function AuthPages() {
                 {[
                   { value: 'student', label: 'Student', icon: <User className="w-4 h-4" /> },
                   { value: 'recruiter', label: 'Recruiter', icon: <Briefcase className="w-4 h-4" /> },
-                  { value: 'admin', label: 'Admin', icon: <Shield className="w-4 h-4" /> }
-                ].map((item) => (
-                  <button
-                    key={item.value}
-                    type="button"
-                    onClick={() => handleRoleChange(item.value)}
-                    className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border p-3 text-center transition ${
-                      role === item.value 
-                        ? 'border-indigo-500 bg-indigo-600/10 text-indigo-400 shadow-lg shadow-indigo-500/10' 
-                        : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/20 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    {item.icon}
-                    <span className="text-[10px] font-bold mt-1.5">{item.label}</span>
-                  </button>
-                ))}
+                  { 
+                    value: 'admin', 
+                    label: 'Admin', 
+                    icon: <Shield className="w-4 h-4" />,
+                    badge: 'HQ' 
+                  }
+                ].map((item) => {
+                  const isActive = role === item.value;
+                  const isAdmin = item.value === 'admin';
+                  return (
+                    <button
+                      key={item.value}
+                      type="button"
+                      onClick={() => handleRoleChange(item.value)}
+                      className={`relative flex cursor-pointer flex-col items-center justify-center rounded-xl border p-3 text-center transition-all duration-300 ${
+                        isActive 
+                          ? isAdmin
+                            ? 'border-amber-500/80 bg-gradient-to-b from-amber-500/20 via-amber-950/30 to-slate-950 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.25)] ring-1 ring-amber-500/50 scale-[1.02]'
+                            : 'border-indigo-500 bg-indigo-600/10 text-indigo-400 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/30' 
+                          : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/20 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      {item.badge && (
+                        <span className={`absolute -top-2 -right-1 rounded-full px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                          isActive && isAdmin 
+                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md shadow-amber-500/40 animate-pulse' 
+                            : 'bg-white/10 text-gray-400 border border-white/10'
+                        }`}>
+                          {item.badge}
+                        </span>
+                      )}
+                      {item.icon}
+                      <span className="text-[10px] font-bold mt-1.5">{item.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Quick Demo Fill Button */}
             {isLogin && (
-              <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-2.5 text-center">
+              <div className={`rounded-xl border transition-all duration-300 p-3 text-center ${
+                role === 'admin'
+                  ? 'border-amber-500/30 bg-amber-500/10 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
+                  : 'border-indigo-500/20 bg-indigo-500/5'
+              }`}>
                 <button
                   type="button"
                   onClick={() => {
                     if (role === 'student') {
                       setEmail('olivia@gmail.com');
-                      setPassword('');
+                      setPassword('password123');
                     } else if (role === 'recruiter') {
                       setEmail('david@stripe.com');
-                      setPassword('');
+                      setPassword('password123');
                     } else {
                       setEmail('admin@careergenie.com');
-                      setPassword('');
+                      setPassword('adminpass');
                     }
                   }}
-                  className="text-xs text-indigo-300 hover:text-indigo-200 font-semibold underline cursor-pointer"
+                  className={`text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5 w-full ${
+                    role === 'admin' ? 'text-amber-300 hover:text-amber-200' : 'text-indigo-300 hover:text-indigo-200'
+                  }`}
                 >
-                  ⚡ Auto-fill demo credentials for {role.charAt(0).toUpperCase() + role.slice(1)}
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Auto-fill <strong>{role.toUpperCase()}</strong> credentials</span>
                 </button>
+                {role === 'admin' && (
+                  <p className="text-[10px] text-amber-400/80 mt-1 font-mono">
+                    🛡️ System Administrator Access (Key pre-loaded)
+                  </p>
+                )}
               </div>
             )}
 
